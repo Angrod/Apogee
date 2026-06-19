@@ -85,6 +85,16 @@ export interface ExportData {
   childAppStatuses: ChildAppStatusRecord[];
 }
 
+export interface DashboardAppEntry {
+  app: CatalogApp;
+  childStatus: string;
+}
+
+export interface DashboardEntry {
+  child: Child;
+  matchedApps: DashboardAppEntry[];
+}
+
 export type ListAppsParams = {
 includeRemoved?: boolean;
 category?: string;

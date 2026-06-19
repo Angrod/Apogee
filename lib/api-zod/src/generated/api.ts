@@ -298,3 +298,42 @@ export const ExportDataResponse = zod.object({
 })
 
 
+/**
+ * @summary Get per-child matched apps with statuses
+ */
+export const GetDashboardResponseItem = zod.object({
+  "child": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "age": zod.number(),
+  "interests": zod.array(zod.string()),
+  "deviceName": zod.string(),
+  "screenTimeWeekday": zod.number(),
+  "screenTimeWeekend": zod.number(),
+  "appleArcade": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+}),
+  "matchedApps": zod.array(zod.object({
+  "app": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "appStoreUrl": zod.string(),
+  "category": zod.string(),
+  "ageMin": zod.number(),
+  "ageMax": zod.number(),
+  "interestTags": zod.array(zod.string()),
+  "costModel": zod.string(),
+  "adStatus": zod.string(),
+  "notes": zod.string(),
+  "lastVerified": zod.string(),
+  "status": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+}),
+  "childStatus": zod.string()
+}))
+})
+export const GetDashboardResponse = zod.array(GetDashboardResponseItem)
+
+

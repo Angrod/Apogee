@@ -18,6 +18,8 @@ tags:
     description: Per-child app status operations
   - name: export
     description: Data export operations
+  - name: dashboard
+    description: Dashboard operations
 
 paths:
   /healthz:
@@ -287,6 +289,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/ExportData"
 
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get per-child matched apps with statuses
+      responses:
+        "200":
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DashboardEntry"
+
 components:
   schemas:
     HealthStatus:
@@ -455,3 +472,23 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ChildAppStatusRecord"
+
+    DashboardAppEntry:
+      type: object
+      required: [app, childStatus]
+      properties:
+        app:
+          $ref: "#/components/schemas/CatalogApp"
+        childStatus:
+          type: string
+
+    DashboardEntry:
+      type: object
+      required: [child, matchedApps]
+      properties:
+        child:
+          $ref: "#/components/schemas/Child"
+        matchedApps:
+          type: array
+          items:
+            $ref: "#/components/schemas/DashboardAppEntry"

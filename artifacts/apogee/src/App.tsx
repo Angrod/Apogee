@@ -2,11 +2,16 @@ import { Switch, Route, Router as WouterRouter, Link, useRoute } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { DownloadIcon } from "lucide-react";
 import NotFound from "@/pages/not-found";
+import Dashboard from "@/pages/dashboard";
 import ChildrenList from "@/pages/children-list";
 import ChildFormPage from "@/pages/child-form";
 import Catalog from "@/pages/catalog";
 import AppFormPage from "@/pages/app-form";
+import { exportData } from "@workspace/api-client-react";
+import { useToast } from "@/hooks/use-toast";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,6 +38,41 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   );
 }
 
+function ExportButton() {
+  const { toast } = useToast();
+
+  async function handleExport() {
+    try {
+      const data = await exportData();
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `apogee-export-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: "Export downloaded" });
+    } catch {
+      toast({ title: "Export failed", variant: "destructive" });
+    }
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleExport}
+      className="ml-auto text-stone-600 border-stone-200 hover:border-amber-300 hover:text-amber-800 gap-1.5"
+    >
+      <DownloadIcon className="h-3.5 w-3.5" />
+      Export Data
+    </Button>
+  );
+}
+
 function Nav() {
   return (
     <nav className="border-b border-stone-200 bg-white sticky top-0 z-50">
@@ -43,17 +83,9 @@ function Nav() {
         <NavLink href="/">Dashboard</NavLink>
         <NavLink href="/catalog">Catalog</NavLink>
         <NavLink href="/children">Children</NavLink>
+        <ExportButton />
       </div>
     </nav>
-  );
-}
-
-function Dashboard() {
-  return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-stone-900 mb-2">Dashboard</h1>
-      <p className="text-stone-500 text-sm">Your children's app recommendations will appear here.</p>
-    </div>
   );
 }
 

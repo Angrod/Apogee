@@ -12,6 +12,8 @@ export * from './child';
 export * from './childAppStatusInput';
 export * from './childAppStatusRecord';
 export * from './childInput';
+export * from './dashboardAppEntry';
+export * from './dashboardEntry';
 export * from './deleteResult';
 export * from './exportData';
 export * from './healthStatus';

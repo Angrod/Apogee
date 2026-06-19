@@ -9,6 +9,8 @@ export const childAppStatusEnum = pgEnum("child_app_status_enum", [
   "Not Installed",
   "Blocked",
   "Limited",
+  "Pushed",
+  "Removed",
 ]);
 
 export const childAppStatusTable = pgTable("child_app_status", {
