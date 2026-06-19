@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, timestamp, pgEnum, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { childrenTable } from "./children";
@@ -13,18 +13,27 @@ export const childAppStatusEnum = pgEnum("child_app_status_enum", [
   "Removed",
 ]);
 
-export const childAppStatusTable = pgTable("child_app_status", {
-  id: serial("id").primaryKey(),
-  childId: integer("child_id")
-    .notNull()
-    .references(() => childrenTable.id),
-  appId: integer("app_id")
-    .notNull()
-    .references(() => appsTable.id),
-  status: childAppStatusEnum("status").notNull().default("Not Installed"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+export const childAppStatusTable = pgTable(
+  "child_app_status",
+  {
+    id: serial("id").primaryKey(),
+    childId: integer("child_id")
+      .notNull()
+      .references(() => childrenTable.id),
+    appId: integer("app_id")
+      .notNull()
+      .references(() => appsTable.id),
+    status: childAppStatusEnum("status").notNull().default("Not Installed"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("child_app_status_child_id_app_id_unique").on(
+      table.childId,
+      table.appId
+    ),
+  ]
+);
 
 export const insertChildAppStatusSchema = createInsertSchema(childAppStatusTable).omit({
   id: true,
