@@ -38,7 +38,7 @@ router.post("/apps", async (req, res) => {
     adStatus: body.adStatus,
     notes: body.notes ?? "",
     status: body.status ?? "Active",
-    lastVerified: new Date(),
+    lastVerified: new Date().toISOString().split("T")[0],
   }).returning();
   return res.status(201).json(app);
 });
@@ -66,7 +66,7 @@ router.put("/apps/:id", async (req, res) => {
       adStatus: body.adStatus,
       notes: body.notes ?? "",
       status: body.status ?? "Active",
-      lastVerified: new Date(),
+      lastVerified: new Date().toISOString().split("T")[0],
       updatedAt: new Date(),
     })
     .where(eq(appsTable.id, id))

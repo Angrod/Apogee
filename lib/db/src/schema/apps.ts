@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, timestamp, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -13,7 +13,7 @@ export const appsTable = pgTable("apps", {
   costModel: text("cost_model").notNull(),
   adStatus: text("ad_status").notNull(),
   notes: text("notes").notNull().default(""),
-  lastVerified: timestamp("last_verified").notNull().defaultNow(),
+  lastVerified: date("last_verified").notNull().defaultNow(),
   status: text("status").notNull().default("Active"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

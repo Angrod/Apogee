@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -6,7 +6,7 @@ export const childrenTable = pgTable("children", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   age: integer("age").notNull(),
-  interests: text("interests").array().notNull().default([]),
+  interests: jsonb("interests").notNull().default([]).$type<string[]>(),
   deviceName: text("device_name").notNull(),
   screenTimeWeekday: integer("screen_time_weekday").notNull().default(0),
   screenTimeWeekend: integer("screen_time_weekend").notNull().default(0),

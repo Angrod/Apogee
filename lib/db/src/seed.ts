@@ -14,7 +14,7 @@ const seedApps = [
     adStatus: "No Ads",
     notes: "Comprehensive early learning with adaptive curriculum. No ads, fully free.",
     status: "Active",
-    lastVerified: new Date(),
+    lastVerified: new Date().toISOString().split("T")[0],
   },
   {
     name: "GarageBand",
@@ -27,7 +27,7 @@ const seedApps = [
     adStatus: "No Ads",
     notes: "Apple's full-featured music creation app. Excellent for music interest.",
     status: "Active",
-    lastVerified: new Date(),
+    lastVerified: new Date().toISOString().split("T")[0],
   },
   {
     name: "Aqua by Adobe",
@@ -40,7 +40,7 @@ const seedApps = [
     adStatus: "No Ads",
     notes: "Adobe watercolor painting app with natural media brushes. Great for creative expression.",
     status: "Active",
-    lastVerified: new Date(),
+    lastVerified: new Date().toISOString().split("T")[0],
   },
   {
     name: "Cargo-Bot",
@@ -53,7 +53,7 @@ const seedApps = [
     adStatus: "No Ads",
     notes: "Programming puzzle game. Teaches logic and sequencing through robot commands.",
     status: "Active",
-    lastVerified: new Date(),
+    lastVerified: new Date().toISOString().split("T")[0],
   },
   {
     name: "Duolingo ABC",
@@ -66,7 +66,7 @@ const seedApps = [
     adStatus: "No Ads",
     notes: "Learn to read with phonics. Designed for young learners, no ads.",
     status: "Active",
-    lastVerified: new Date(),
+    lastVerified: new Date().toISOString().split("T")[0],
   },
   {
     name: "PBS Kids Games",
@@ -79,7 +79,7 @@ const seedApps = [
     adStatus: "No Ads",
     notes: "Games featuring Curious George, Daniel Tiger, and more. Safe and educational.",
     status: "Active",
-    lastVerified: new Date(),
+    lastVerified: new Date().toISOString().split("T")[0],
   },
   {
     name: "Toca Boca Jr",
@@ -92,7 +92,7 @@ const seedApps = [
     adStatus: "No Ads",
     notes: "Open-ended creative play worlds from Toca Boca. No ads, no in-app pressure.",
     status: "Active",
-    lastVerified: new Date(),
+    lastVerified: new Date().toISOString().split("T")[0],
   },
   {
     name: "Simple Machines by Tinybop",
@@ -105,7 +105,7 @@ const seedApps = [
     adStatus: "No Ads",
     notes: "Explore levers, wheels, pulleys, inclined planes. Hands-on STEM learning.",
     status: "Active",
-    lastVerified: new Date(),
+    lastVerified: new Date().toISOString().split("T")[0],
   },
   {
     name: "Sketchbook",
@@ -118,7 +118,7 @@ const seedApps = [
     adStatus: "No Ads",
     notes: "Full-featured drawing app with layers and brushes. Autodesk made this free.",
     status: "Active",
-    lastVerified: new Date(),
+    lastVerified: new Date().toISOString().split("T")[0],
   },
   {
     name: "Endless Alphabet",
@@ -131,7 +131,7 @@ const seedApps = [
     adStatus: "No Ads",
     notes: "Vocabulary building through animated puzzles. Charming and effective for early learners.",
     status: "Active",
-    lastVerified: new Date(),
+    lastVerified: new Date().toISOString().split("T")[0],
   },
 ];
 

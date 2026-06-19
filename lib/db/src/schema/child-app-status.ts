@@ -1,8 +1,15 @@
-import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { childrenTable } from "./children";
 import { appsTable } from "./apps";
+
+export const childAppStatusEnum = pgEnum("child_app_status_enum", [
+  "Installed",
+  "Not Installed",
+  "Blocked",
+  "Limited",
+]);
 
 export const childAppStatusTable = pgTable("child_app_status", {
   id: serial("id").primaryKey(),
@@ -12,7 +19,7 @@ export const childAppStatusTable = pgTable("child_app_status", {
   appId: integer("app_id")
     .notNull()
     .references(() => appsTable.id),
-  status: text("status").notNull().default("Not Installed"),
+  status: childAppStatusEnum("status").notNull().default("Not Installed"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
