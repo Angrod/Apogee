@@ -1,5 +1,6 @@
 import { db } from "./index";
 import { appsTable } from "./schema/apps";
+import { childrenTable } from "./schema/children";
 import { eq } from "drizzle-orm";
 
 const seedApps = [
@@ -135,6 +136,36 @@ const seedApps = [
   },
 ];
 
+const seedChildren = [
+  {
+    name: "Olivia",
+    age: 8,
+    interests: ["Drawing", "Reading", "Music"],
+    deviceName: "Olivia's iPad",
+    screenTimeWeekday: 90,
+    screenTimeWeekend: 120,
+    appleArcade: false,
+  },
+  {
+    name: "Marcus",
+    age: 11,
+    interests: ["Engineering", "Gaming", "Math", "Science"],
+    deviceName: "Marcus's iPad",
+    screenTimeWeekday: 120,
+    screenTimeWeekend: 180,
+    appleArcade: true,
+  },
+  {
+    name: "Zoe",
+    age: 6,
+    interests: ["Reading", "Baking/Food", "Music"],
+    deviceName: "Zoe's iPad",
+    screenTimeWeekday: 60,
+    screenTimeWeekend: 90,
+    appleArcade: false,
+  },
+];
+
 async function seed() {
   console.log("Seeding apps...");
   for (const app of seedApps) {
@@ -149,6 +180,21 @@ async function seed() {
       console.log(`  Skipped (already exists): ${app.name}`);
     }
   }
+
+  console.log("Seeding children...");
+  for (const child of seedChildren) {
+    const existing = await db
+      .select()
+      .from(childrenTable)
+      .where(eq(childrenTable.name, child.name));
+    if (existing.length === 0) {
+      await db.insert(childrenTable).values(child);
+      console.log(`  Inserted: ${child.name}`);
+    } else {
+      console.log(`  Skipped (already exists): ${child.name}`);
+    }
+  }
+
   console.log("Seeding complete.");
   process.exit(0);
 }
