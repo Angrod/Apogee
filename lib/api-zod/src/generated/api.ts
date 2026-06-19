@@ -102,6 +102,18 @@ export const UpdateChildResponse = zod.object({
 
 
 /**
+ * @summary Delete a child profile
+ */
+export const DeleteChildParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteChildResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
  * @summary List apps
  */
 export const ListAppsQueryParams = zod.object({
@@ -206,6 +218,18 @@ export const UpdateAppResponse = zod.object({
   "status": zod.string(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Delete an app from the catalog
+ */
+export const DeleteAppParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteAppResponse = zod.object({
+  "success": zod.boolean()
 })
 
 

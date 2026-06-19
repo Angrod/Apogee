@@ -12,6 +12,7 @@ export * from './child';
 export * from './childAppStatusInput';
 export * from './childAppStatusRecord';
 export * from './childInput';
+export * from './deleteResult';
 export * from './exportData';
 export * from './healthStatus';
 export * from './listAppsParams';

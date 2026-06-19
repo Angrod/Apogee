@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { appsTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 const router = Router();
 
@@ -22,7 +22,7 @@ router.get("/apps", async (req, res) => {
     apps = apps.filter((a) => a.interestTags.includes(interestTag));
   }
 
-  res.json(apps);
+  return res.json(apps);
 });
 
 router.post("/apps", async (req, res) => {
@@ -40,14 +40,14 @@ router.post("/apps", async (req, res) => {
     status: body.status ?? "Active",
     lastVerified: new Date(),
   }).returning();
-  res.status(201).json(app);
+  return res.status(201).json(app);
 });
 
 router.get("/apps/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const [app] = await db.select().from(appsTable).where(eq(appsTable.id, id));
   if (!app) return res.status(404).json({ error: "Not found" });
-  res.json(app);
+  return res.json(app);
 });
 
 router.put("/apps/:id", async (req, res) => {
@@ -72,7 +72,14 @@ router.put("/apps/:id", async (req, res) => {
     .where(eq(appsTable.id, id))
     .returning();
   if (!app) return res.status(404).json({ error: "Not found" });
-  res.json(app);
+  return res.json(app);
+});
+
+router.delete("/apps/:id", async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const [app] = await db.delete(appsTable).where(eq(appsTable.id, id)).returning();
+  if (!app) return res.status(404).json({ error: "Not found" });
+  return res.json({ success: true });
 });
 
 export default router;

@@ -111,6 +111,25 @@ paths:
                 $ref: "#/components/schemas/Child"
         "404":
           description: Not found
+    delete:
+      operationId: deleteChild
+      tags: [children]
+      summary: Delete a child profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResult"
+        "404":
+          description: Not found
 
   /apps:
     get:
@@ -205,6 +224,25 @@ paths:
                 $ref: "#/components/schemas/CatalogApp"
         "404":
           description: Not found
+    delete:
+      operationId: deleteApp
+      tags: [apps]
+      summary: Delete an app from the catalog
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResult"
+        "404":
+          description: Not found
 
   /child-app-status/{childId}/{appId}:
     put:
@@ -258,6 +296,14 @@ components:
           type: string
       required:
         - status
+
+    DeleteResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required:
+        - success
 
     Child:
       type: object

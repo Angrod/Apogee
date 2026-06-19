@@ -7,7 +7,7 @@ const router = Router();
 
 router.get("/children", async (_req, res) => {
   const children = await db.select().from(childrenTable).orderBy(childrenTable.id);
-  res.json(children);
+  return res.json(children);
 });
 
 router.post("/children", async (req, res) => {
@@ -21,14 +21,14 @@ router.post("/children", async (req, res) => {
     screenTimeWeekend: body.screenTimeWeekend ?? 0,
     appleArcade: body.appleArcade ?? false,
   }).returning();
-  res.status(201).json(child);
+  return res.status(201).json(child);
 });
 
 router.get("/children/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const [child] = await db.select().from(childrenTable).where(eq(childrenTable.id, id));
   if (!child) return res.status(404).json({ error: "Not found" });
-  res.json(child);
+  return res.json(child);
 });
 
 router.put("/children/:id", async (req, res) => {
@@ -49,7 +49,14 @@ router.put("/children/:id", async (req, res) => {
     .where(eq(childrenTable.id, id))
     .returning();
   if (!child) return res.status(404).json({ error: "Not found" });
-  res.json(child);
+  return res.json(child);
+});
+
+router.delete("/children/:id", async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const [child] = await db.delete(childrenTable).where(eq(childrenTable.id, id)).returning();
+  if (!child) return res.status(404).json({ error: "Not found" });
+  return res.json({ success: true });
 });
 
 export default router;

@@ -26,6 +26,7 @@ import type {
   ChildAppStatusInput,
   ChildAppStatusRecord,
   ChildInput,
+  DeleteResult,
   ExportData,
   HealthStatus,
   ListAppsParams
@@ -418,6 +419,76 @@ export const useUpdateChild = <TError = ErrorType<void>,
       return useMutation(getUpdateChildMutationOptions(options));
     }
 
+export const getDeleteChildUrl = (id: number,) => {
+
+
+
+
+  return `/api/children/${id}`
+}
+
+/**
+ * @summary Delete a child profile
+ */
+export const deleteChild = async (id: number, options?: RequestInit): Promise<DeleteResult> => {
+
+  return customFetch<DeleteResult>(getDeleteChildUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteChildMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChild>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteChild>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteChild'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteChild>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteChild(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteChildMutationResult = NonNullable<Awaited<ReturnType<typeof deleteChild>>>
+
+    export type DeleteChildMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete a child profile
+ */
+export const useDeleteChild = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChild>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteChild>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteChildMutationOptions(options));
+    }
+
 export const getListAppsUrl = (params?: ListAppsParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -720,6 +791,76 @@ export const useUpdateApp = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getUpdateAppMutationOptions(options));
+    }
+
+export const getDeleteAppUrl = (id: number,) => {
+
+
+
+
+  return `/api/apps/${id}`
+}
+
+/**
+ * @summary Delete an app from the catalog
+ */
+export const deleteApp = async (id: number, options?: RequestInit): Promise<DeleteResult> => {
+
+  return customFetch<DeleteResult>(getDeleteAppUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteAppMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApp>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApp>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteApp'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApp>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteApp(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAppMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApp>>>
+
+    export type DeleteAppMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete an app from the catalog
+ */
+export const useDeleteApp = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApp>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApp>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteAppMutationOptions(options));
     }
 
 export const getUpdateChildAppStatusUrl = (childId: number,

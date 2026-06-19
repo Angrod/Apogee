@@ -9,6 +9,10 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface DeleteResult {
+  success: boolean;
+}
+
 export interface Child {
   id: number;
   name: string;
