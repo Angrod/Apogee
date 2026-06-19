@@ -10,6 +10,7 @@ import {
   useUpdateApp,
   getListAppsQueryKey,
   getGetAppQueryKey,
+  type ListAppsParams,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,7 +152,8 @@ function AppFormContent({ appId }: { appId?: number }) {
   const createMutation = useCreateApp({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["/api/apps"] });
+        queryClient.invalidateQueries({ queryKey: getListAppsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListAppsQueryKey({ includeRemoved: true } as ListAppsParams) });
         toast({ title: "App added to catalog" });
         navigate("/catalog");
       },
@@ -164,7 +166,8 @@ function AppFormContent({ appId }: { appId?: number }) {
   const updateMutation = useUpdateApp({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["/api/apps"] });
+        queryClient.invalidateQueries({ queryKey: getListAppsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListAppsQueryKey({ includeRemoved: true } as ListAppsParams) });
         toast({ title: "App saved" });
         navigate("/catalog");
       },
@@ -351,32 +354,30 @@ function AppFormContent({ appId }: { appId?: number }) {
         />
       </FormField>
 
-      {isEditing && (
-        <div className="rounded-lg border border-stone-200 p-4">
-          <p className="text-sm font-medium text-stone-700 mb-2">Status</p>
-          <div className="flex gap-2">
-            {(["Active", "Removed"] as const).map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setValue("status", s)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                  status === s
-                    ? s === "Active"
-                      ? "bg-green-100 border-green-400 text-green-900"
-                      : "bg-red-100 border-red-400 text-red-900"
-                    : "bg-white border-stone-200 text-stone-600 hover:border-stone-300"
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-stone-400 mt-1.5">
-            Removed apps stay in the database but are hidden from the catalog by default.
-          </p>
+      <div className="rounded-lg border border-stone-200 p-4">
+        <p className="text-sm font-medium text-stone-700 mb-2">Status</p>
+        <div className="flex gap-2">
+          {(["Active", "Removed"] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setValue("status", s)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                status === s
+                  ? s === "Active"
+                    ? "bg-green-100 border-green-400 text-green-900"
+                    : "bg-red-100 border-red-400 text-red-900"
+                  : "bg-white border-stone-200 text-stone-600 hover:border-stone-300"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
         </div>
-      )}
+        <p className="text-xs text-stone-400 mt-1.5">
+          Removed apps stay in the database but are hidden from the catalog by default.
+        </p>
+      </div>
 
       <div className="flex items-center gap-3 pt-2">
         <Button
