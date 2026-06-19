@@ -14,13 +14,6 @@ import { ExternalLinkIcon, RocketIcon, GamepadIcon } from "lucide-react";
 const STATUS_ORDER = ["Pushed", "Installed", "Not Installed", "Removed"] as const;
 type AppStatus = (typeof STATUS_ORDER)[number];
 
-const STATUS_LABELS: Record<AppStatus, string> = {
-  Pushed: "Pushed",
-  Installed: "Installed",
-  "Not Installed": "Not Installed",
-  Removed: "Removed",
-};
-
 const STATUS_COLORS: Record<AppStatus, string> = {
   Pushed: "text-blue-700 bg-blue-50 border-blue-200",
   Installed: "text-green-700 bg-green-50 border-green-200",
@@ -40,6 +33,11 @@ function costColor(cost: string) {
   return "bg-sky-100 text-sky-800 border-sky-200";
 }
 
+function toAppStatus(s: string): AppStatus {
+  if (STATUS_ORDER.includes(s as AppStatus)) return s as AppStatus;
+  return "Not Installed";
+}
+
 type StatusKey = string;
 
 interface AppCardProps {
@@ -56,7 +54,7 @@ function AppCard({ entry, childId, localStatus, onStatusChange, isMutating }: Ap
 
   return (
     <div className="rounded-lg border border-stone-200 bg-white p-3 space-y-2">
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-stone-900 leading-tight truncate">{app.name}</p>
           <div className="flex items-center gap-1.5 mt-1">
@@ -85,7 +83,7 @@ function AppCard({ entry, childId, localStatus, onStatusChange, isMutating }: Ap
         >
           {STATUS_ORDER.map((s) => (
             <option key={s} value={s}>
-              {STATUS_LABELS[s]}
+              {s}
             </option>
           ))}
         </select>
@@ -106,7 +104,12 @@ function AppCard({ entry, childId, localStatus, onStatusChange, isMutating }: Ap
   );
 }
 
-function ChildColumn({ entry, statusOverrides, onStatusChange, mutatingKeys }: {
+function ChildColumn({
+  entry,
+  statusOverrides,
+  onStatusChange,
+  mutatingKeys,
+}: {
   entry: DashboardEntry;
   statusOverrides: Map<string, AppStatus>;
   onStatusChange: (key: string, status: AppStatus) => void;
@@ -123,21 +126,19 @@ function ChildColumn({ entry, statusOverrides, onStatusChange, mutatingKeys }: {
 
     for (const appEntry of matchedApps) {
       const key = `${child.id}-${appEntry.app.id}`;
-      const localStatus = statusOverrides.get(key) ?? (appEntry.childStatus as AppStatus);
+      const rawStatus = statusOverrides.get(key) ?? toAppStatus(appEntry.childStatus);
 
-      if (localStatus === "Removed") continue;
+      if (rawStatus === "Removed") continue;
       if (child.appleArcade && appEntry.app.category === "Games") continue;
 
-      const group = groups[localStatus] ?? groups["Not Installed"];
+      const group = groups[rawStatus] ?? groups["Not Installed"];
       group.push(appEntry);
     }
 
     return groups;
   }, [matchedApps, statusOverrides, child]);
 
-  const hasAnyApps = child.appleArcade
-    ? matchedApps.some(a => a.app.category !== "Games")
-    : matchedApps.length > 0;
+  const hasArcadeGames = child.appleArcade && matchedApps.some((a) => a.app.category === "Games");
 
   return (
     <div className="flex flex-col min-w-0">
@@ -153,18 +154,11 @@ function ChildColumn({ entry, statusOverrides, onStatusChange, mutatingKeys }: {
         )}
       </div>
 
-      {!hasAnyApps && (
-        <div className="text-center py-8 text-stone-400 text-sm">
-          No matching apps yet.<br />
-          <span className="text-xs">Check interests &amp; age in the child's profile.</span>
-        </div>
-      )}
-
-      {child.appleArcade && matchedApps.some(a => a.app.category === "Games") && (
+      {hasArcadeGames && (
         <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-3 mb-3 flex items-center gap-2">
           <GamepadIcon className="h-4 w-4 text-indigo-600 shrink-0" />
           <p className="text-xs text-indigo-700">
-            <span className="font-medium">Games via Apple Arcade</span> — catalog games replaced by Apple Arcade subscription.
+            <span className="font-medium">Games via Apple Arcade</span> — catalog games hidden for this child.
           </p>
         </div>
       )}
@@ -181,7 +175,8 @@ function ChildColumn({ entry, statusOverrides, onStatusChange, mutatingKeys }: {
               <div className="space-y-2">
                 {apps.map((appEntry) => {
                   const key = `${child.id}-${appEntry.app.id}`;
-                  const localStatus = statusOverrides.get(key) ?? (appEntry.childStatus as AppStatus);
+                  const localStatus =
+                    statusOverrides.get(key) ?? toAppStatus(appEntry.childStatus);
                   return (
                     <AppCard
                       key={key}
@@ -197,6 +192,15 @@ function ChildColumn({ entry, statusOverrides, onStatusChange, mutatingKeys }: {
             </div>
           );
         })}
+
+        {Object.values(grouped).every((g) => g.length === 0) &&
+          !hasArcadeGames && (
+            <div className="text-center py-8 text-stone-400 text-sm">
+              No matching apps yet.
+              <br />
+              <span className="text-xs">Check interests &amp; age in the profile.</span>
+            </div>
+          )}
       </div>
     </div>
   );
@@ -237,6 +241,8 @@ export default function Dashboard() {
       const childId = parseInt(childIdStr, 10);
       const appId = parseInt(appIdStr, 10);
 
+      const previousStatus = statusOverrides.get(key);
+
       setStatusOverrides((prev) => {
         const next = new Map(prev);
         next.set(key, newStatus);
@@ -249,6 +255,22 @@ export default function Dashboard() {
         {
           onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
+            setStatusOverrides((prev) => {
+              const next = new Map(prev);
+              next.delete(key);
+              return next;
+            });
+          },
+          onError: () => {
+            setStatusOverrides((prev) => {
+              const next = new Map(prev);
+              if (previousStatus !== undefined) {
+                next.set(key, previousStatus);
+              } else {
+                next.delete(key);
+              }
+              return next;
+            });
           },
           onSettled: () => {
             setMutatingKeys((prev) => {
@@ -260,18 +282,16 @@ export default function Dashboard() {
         }
       );
     },
-    [updateStatus, queryClient]
+    [updateStatus, queryClient, statusOverrides]
   );
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-stone-900">Dashboard</h1>
-          <p className="text-sm text-stone-500 mt-1">
-            Apps matched to each child by age and interests.
-          </p>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-stone-900">Dashboard</h1>
+        <p className="text-sm text-stone-500 mt-1">
+          Apps matched to each child by age and interests.
+        </p>
       </div>
 
       {isError && (
