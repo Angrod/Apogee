@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import ChildrenList from "@/pages/children-list";
 import ChildFormPage from "@/pages/child-form";
+import Catalog from "@/pages/catalog";
+import AppFormPage from "@/pages/app-form";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,15 +57,6 @@ function Dashboard() {
   );
 }
 
-function Catalog() {
-  return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-stone-900 mb-2">App Catalog</h1>
-      <p className="text-stone-500 text-sm">Your vetted app catalog will appear here.</p>
-    </div>
-  );
-}
-
 function Router() {
   return (
     <div className="min-h-screen bg-stone-50">
@@ -71,6 +64,8 @@ function Router() {
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/catalog" component={Catalog} />
+        <Route path="/catalog/new" component={AppFormPage} />
+        <Route path="/catalog/:id" component={AppFormPage} />
         <Route path="/children" component={ChildrenList} />
         <Route path="/children/new" component={ChildFormPage} />
         <Route path="/children/:id" component={ChildFormPage} />
