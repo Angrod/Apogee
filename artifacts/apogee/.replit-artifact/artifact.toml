@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Apogee"
+version = "1.0.0"
+id = "artifacts/apogee"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21533
+
+[services.development]
+run = "pnpm --filter @workspace/apogee run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/apogee", "run", "build" ]
+publicDir = "artifacts/apogee/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21533"
+BASE_PATH = "/"

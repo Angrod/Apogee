@@ -10,6 +10,15 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: children
+    description: Child profile operations
+  - name: apps
+    description: App catalog operations
+  - name: childAppStatus
+    description: Per-child app status operations
+  - name: export
+    description: Data export operations
+
 paths:
   /healthz:
     get:
@@ -24,6 +33,222 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /children:
+    get:
+      operationId: listChildren
+      tags: [children]
+      summary: List all children
+      responses:
+        "200":
+          description: List of children
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Child"
+    post:
+      operationId: createChild
+      tags: [children]
+      summary: Create a child profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChildInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+
+  /children/{id}:
+    get:
+      operationId: getChild
+      tags: [children]
+      summary: Get a child profile by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Child profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+        "404":
+          description: Not found
+    put:
+      operationId: updateChild
+      tags: [children]
+      summary: Update a child profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChildInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+        "404":
+          description: Not found
+
+  /apps:
+    get:
+      operationId: listApps
+      tags: [apps]
+      summary: List apps
+      parameters:
+        - name: includeRemoved
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: interestTag
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of apps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CatalogApp"
+    post:
+      operationId: createApp
+      tags: [apps]
+      summary: Add an app to the catalog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogApp"
+
+  /apps/{id}:
+    get:
+      operationId: getApp
+      tags: [apps]
+      summary: Get an app by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: App
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogApp"
+        "404":
+          description: Not found
+    put:
+      operationId: updateApp
+      tags: [apps]
+      summary: Update an app
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogApp"
+        "404":
+          description: Not found
+
+  /child-app-status/{childId}/{appId}:
+    put:
+      operationId: updateChildAppStatus
+      tags: [childAppStatus]
+      summary: Upsert per-child app status
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChildAppStatusInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChildAppStatusRecord"
+
+  /export:
+    get:
+      operationId: exportData
+      tags: [export]
+      summary: Export all data as JSON
+      responses:
+        "200":
+          description: Full data export
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportData"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +259,153 @@ components:
       required:
         - status
 
+    Child:
+      type: object
+      required: [id, name, age, interests, deviceName, screenTimeWeekday, screenTimeWeekend, appleArcade, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        age:
+          type: integer
+        interests:
+          type: array
+          items:
+            type: string
+        deviceName:
+          type: string
+        screenTimeWeekday:
+          type: integer
+        screenTimeWeekend:
+          type: integer
+        appleArcade:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ChildInput:
+      type: object
+      required: [name, age, interests, deviceName, screenTimeWeekday, screenTimeWeekend, appleArcade]
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+        interests:
+          type: array
+          items:
+            type: string
+        deviceName:
+          type: string
+        screenTimeWeekday:
+          type: integer
+        screenTimeWeekend:
+          type: integer
+        appleArcade:
+          type: boolean
+
+    CatalogApp:
+      type: object
+      required: [id, name, appStoreUrl, category, ageMin, ageMax, interestTags, costModel, adStatus, notes, lastVerified, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        appStoreUrl:
+          type: string
+        category:
+          type: string
+        ageMin:
+          type: integer
+        ageMax:
+          type: integer
+        interestTags:
+          type: array
+          items:
+            type: string
+        costModel:
+          type: string
+        adStatus:
+          type: string
+        notes:
+          type: string
+        lastVerified:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    AppInput:
+      type: object
+      required: [name, appStoreUrl, category, ageMin, ageMax, interestTags, costModel, adStatus]
+      properties:
+        name:
+          type: string
+        appStoreUrl:
+          type: string
+        category:
+          type: string
+        ageMin:
+          type: integer
+        ageMax:
+          type: integer
+        interestTags:
+          type: array
+          items:
+            type: string
+        costModel:
+          type: string
+        adStatus:
+          type: string
+        notes:
+          type: string
+        status:
+          type: string
+
+    ChildAppStatusRecord:
+      type: object
+      required: [id, childId, appId, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        appId:
+          type: integer
+        status:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ChildAppStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    ExportData:
+      type: object
+      required: [children, apps, childAppStatuses]
+      properties:
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/Child"
+        apps:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogApp"
+        childAppStatuses:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChildAppStatusRecord"
