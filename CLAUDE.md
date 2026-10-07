@@ -4,7 +4,7 @@ An MDM for parents: Jamf Pro-style device and app management, scaled down for a 
 
 ## Product direction
 
-Apogee has two jobs: recording the parent's decisions (catalog, per-child status, notes) and acting on the devices. The goal is for apps to reach a child's iPad from the shared catalog, either pushed by the parent or installed by the kids themselves as long as the app is in the catalog. How that delivery will work is still open (MDM install commands, a self-service model like Jamf Self Service, or something else).
+Apogee has two jobs: recording the parent's decisions (catalog, per-child status, notes) and acting on the devices. The goal is for apps to reach a child's iPad from the shared catalog, either pushed by the parent or installed by the kids themselves as long as the app is in the catalog. Device control is built on paths that work for any family: App Store/Family Sharing flows plus Apple's Screen Time API (a native app). MDM (NanoMDM) is deferred until Apple confirms it's allowed for families, and in the meantime would only be used for this household. See `docs/DEVICE_CONTROL.md` §5.
 
 The current Stage 1 code only does the recording half. "Pushed" is still just a status marker. Until real delivery exists, the UI and docs should not imply that an install happened.
 

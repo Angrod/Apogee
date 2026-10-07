@@ -54,40 +54,42 @@ Without ABM there are no device-assigned licenses, and without those, MDM instal
 
 The iPads and Apple's push service have to reach the MDM server over public HTTPS. Apogee currently has no auth. Authentication has to ship before any device enrolls.
 
-## 4. Engine options
+## 4. The licensing model is the real constraint
 
-| | NanoMDM (self-hosted) | Wrap a commercial MDM (e.g. SimpleMDM) |
-|---|---|---|
-| Push cert | Needs vendor signing, organizations only (3a) | Vendor handles signing; you upload a cert you create at Apple's Push Certificates Portal |
-| Cost | Hosting only | ~$2.50/device/month, about $7.50/month for 3 iPads, REST API included ([GetApp](https://www.getapp.com/all-software/a/simplemdm/)) |
-| Setup effort | High: server, TLS, SCEP, APNs, DDM, ABM token sync | Low: enroll the devices, call the API |
-| Control | Full protocol access | Whatever the vendor API exposes (apps, profiles, inventory, and OS updates are standard) |
-| Fit for a commercial product | Best long-term; this is what an "Apogee MDM" product would run on | Fine for MVP; per-device cost and vendor lock-in at scale |
-| ABM still needed for no-Ask-to-Buy installs? | Yes | Yes |
+Commercial MDMs like Fleet don't hold licenses for their customers. **Each customer brings their own Apple accounts.** The vendor signs the push-certificate request ([Fleet docs](https://fleetdm.com/docs/using-fleet/MDM-setup)). The customer creates the push certificate with their own Apple account, buys app licenses in their own ABM, and manages devices they own. Fleet supports [multiple ABM/VPP tokens](https://fleetdm.com/guides/install-vpp-apps-on-macos-using-fleet) for service providers, but each token still belongs to a client organization.
 
-**Unverified:** whether commercial MDM vendors' terms allow purely personal or family use. Check this before signing up.
+That model doesn't carry over to families. Every household would need its own ABM, which means its own legal entity. Apple has no consumer version of ABM licensing. The consumer equivalent is Family Sharing plus Ask to Buy. Two things are **unverified**, and both are likely problems:
+- Using one Apogee-owned push certificate to manage many families' personal iPads (mdmcert.download quotes Apple as "very explicitly" forbidding MDM on personal devices).
+- Installing ABM licenses that Apogee bought onto other households' devices.
 
-## 5. Recommendation
+## 5. Decision (2026-10-06)
 
-The real blocker isn't which MDM engine to use. **It's not having a legal entity.** Both the NanoMDM path and the "no Ask to Buy" path need one. The user already sees Apogee as the seed of a commercial product, so:
+**The multi-family product is built on paths that need no organization:**
 
-1. **Form an LLC** (it serves the future business too) and request a free D-U-N-S number. This takes a few weeks and is outside the code.
-2. **Enroll in Apple Business (ABM)** using the LLC. The free apps in the catalog can be "purchased" there at $0 and assigned as device licenses.
-3. **Engine: start with a commercial MDM API, behind an Apogee provider interface.** It's the quickest way to get real installs, and it lets us test the product (self-service catalog, update policy) on three iPads for a few dollars a month. Once the LLC exists, NanoMDM becomes possible, and switching to it means writing one new provider rather than rebuilding.
-   - If the user would rather build on NanoMDM from day one (more ownership and learning, slower), that's reasonable once the LLC and push cert are in place. The provider interface is the same either way.
-4. **Ship auth before enrolling any device.**
-5. **Supervision is the next step after that.** Wipe and supervise through Apple Configurator, then add the device to ABM. That unlocks real `.0` deferral, App Store lockdown, and silent installs.
+1. **App Store and Family Sharing.** Apogee curates the catalog, matches apps to each child, links to the App Store, and tracks state. Ask to Buy stays, but Apogee makes each approval quicker and better informed.
+2. **The Screen Time API** (FamilyControls / ManagedSettings / DeviceActivity). This is Apple's framework for consumer parental controls: app blocking, downtime, app limits, and Homework/Educational modes. It can't install apps. Development builds run on your own registered devices without Apple's approval. TestFlight and App Store distribution need a Family Controls distribution request **for each bundle ID** (the main app and each extension). In 2026, developers on Apple's forums report long waits for approval ([example](https://developer.apple.com/forums/thread/818553)).
 
-### What happens with no LLC
-Apogee can still enroll the iPads through a commercial MDM (if its terms allow personal use) and get inventory, real installed-state, and update *enforcement*. But app installs will still trigger Ask to Buy, so the main pain point isn't solved.
+**MDM is deferred until Apple confirms it's allowed:**
 
-## 6. Open questions for the user
-- Is forming an LLC acceptable? (Recommended: it unblocks ABM and NanoMDM, and supports the commercial plan.)
-- Start on a commercial MDM API, or wait for the LLC and go straight to NanoMDM?
-- Are any catalog apps paid? ABM licenses for paid apps cost money per device.
+4. **Ask Apple** (Developer Support or a partnership inquiry) whether a family or consumer MDM model is allowed: a shared push certificate, and licenses deployed to other households. Until then, MDM is an add-on, not a foundation.
 
-## 7. Next tasks (pending decisions)
-1. Authentication (required before enrollment).
-2. Device-control layer: a `devices` table, an `mdm_commands` log, `apps.adam_id`, and a provider interface in `artifacts/api-server/src/lib/device-control/`. Add `Requested`/`Installing`/`Failed` states; `Installed` comes from device inventory.
-3. Kid self-service view: a home-screen web clip showing only that child's matched catalog apps, built with big icons and little text for ages 3–7.
-4. OS update policy: an approved-version list per device, pushed as enforcement declarations.
+**MDM for this household only** (optional, once an LLC exists): **NanoMDM**, with Apogee as the dashboard. This is the same model as Fleet's, with this household's LLC as the organization. NanoMDM was chosen over Fleet because:
+- Fleet puts ABM licensing (VPP), the feature that removes Ask to Buy, in **Premium** ([Fleet](https://fleetdm.com/guides/install-app-store-apps)).
+- Fleet recommends 2 vCPU / 4 GB RAM plus MySQL and Redis ([reference architectures](https://fleetdm.com/docs/deploy/reference-architectures)).
+- Fleet's admin UI would duplicate Apogee's.
+- NanoMDM leaves tenancy (families, devices) in Apogee's own database.
+
+MicroMDM is end-of-life and not an option.
+
+Rejected options: wrapping a commercial MDM API (the per-device cost and family-use terms are both unclear), and Apogee-owned or leased devices (a different hardware business; it could be revisited later).
+
+## 6. Open questions
+- What does Apple say about consumer or family MDM (path 4)?
+- How should bundle IDs be named? This must be settled before any Family Controls distribution request, because each request is for a specific bundle ID.
+- Timing of the LLC. It's only needed for this household's MDM and ABM, not for paths 1–2.
+
+## 7. Next tasks (not yet approved)
+1. **Screen Time app spike:** a minimal native iOS app using FamilyControls, built as a development build on one of this household's iPads. It proves out authorization, shielding one app, and a downtime schedule.
+2. **Apogee ↔ Screen Time app link:** the native app reads the child's profile and catalog from the Apogee API. This needs authentication first.
+3. **Smarter App Store flow (path 1):** an App Store ID per catalog app, deep links, and a "requested by kid" state.
+4. **Authentication.** Required before anything leaves the local network.
