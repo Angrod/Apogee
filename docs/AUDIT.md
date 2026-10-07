@@ -132,12 +132,21 @@ App and child saves don't invalidate the dashboard query, so new matches can tak
 
 ---
 
+## Step 2 notes (done)
+Removed: the mockup sandbox, the `scripts/` package (including the auto schema push, 2.9), 45 UI components, `use-mobile`, the tooltip provider, 41 packages, Replit config/plugins/remote, `opengraph.jpg`, unused theme CSS (CSS bundle 101 KB → 38 KB), `cookie-parser`, `express.urlencoded`, and the 80-entry build externals list. `index.html` is now `noindex` and pinch-zoom works again. The 404 page has user-facing text. The dev server binds to localhost unless `HOST=0.0.0.0` is set.
+
+Kept on purpose:
+- Replit's `hover-elevate` CSS, because Button and Badge use it for hover feedback. Restyling belongs with the UI work.
+- `custom-fetch.ts` helpers, which may be useful for a native client.
+- The server-side catalog filters.
+- The orange-square `favicon.svg` placeholder (it needs a real icon).
+
 ## Proposed cleanup order
 
 Each step is a separate, reviewable change.
 
 1. ✅ **Make it run locally:** fix the workspace overrides and lockfile (1.1) and add the Vite `/api` proxy (1.2). Without this nothing else can be tested.
-2. **Remove Replit leftovers and bloat** (§4, §5): mockup sandbox, unused UI and packages, Replit config and plugins, `index.html` placeholders, `noindex`. Pure deletion; verified by typecheck, build, and clicking through.
+2. ✅ **Remove Replit leftovers and bloat** (§4, §5): mockup sandbox, unused UI and packages, Replit config and plugins, `index.html` placeholders, `noindex`. Pure deletion; verified by typecheck, build, and clicking through.
 3. **Fix the data-loss and drift bugs** (2.1, 2.2, 2.6, 2.7, 2.8): frontend only.
 4. **Harden the API** (2.3, 2.4, 2.5): enums in the spec, validation with the generated schemas, a JSON error handler, an atomic upsert, removed or replaced DELETEs.
 5. **Consolidate** (§6): shared constants from the spec, one matching function, the `<Link>`/`<Button>` fix, one Zod version.

@@ -5,7 +5,7 @@ What's being worked on, what's next, and what's waiting on someone outside the c
 _Last updated: 2026-10-07_
 
 ## Now
-**Code cleanup.** The audit is done: see [AUDIT.md](AUDIT.md). Next is working through its 7-step cleanup order, one approved step at a time. Step 1 (build and run on macOS) is done. Next is step 2, removing bloat and Replit leftovers.
+**Code cleanup.** The audit is done: see [AUDIT.md](AUDIT.md). Next is working through its 7-step cleanup order, one approved step at a time. Steps 1–2 (build on macOS, remove bloat and Replit leftovers) are done. Next is step 3, fixing the frontend data-loss and drift bugs.
 
 ## Next (in order, each needs approval before starting)
 1. **Local Postgres** so the app runs fully off Replit (the proxy and build fixes are in the cleanup).

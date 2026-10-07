@@ -296,13 +296,11 @@ pnpm workspace with a frontend, API server, and shared libraries.
 artifacts/
   apogee/             Main React app
   api-server/         Express API
-  mockup-sandbox/     Separate design-preview workspace (not required by the app)
 lib/
   db/                 Database schema, connection, seed script
   api-spec/           OpenAPI contract and codegen configuration
   api-client-react/   Generated client, hooks, shared fetch helper
   api-zod/            Generated validation schemas
-scripts/              Workspace utility scripts
 docs/                 This guide and the original brief
 ```
 
