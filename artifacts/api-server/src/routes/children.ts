@@ -1,7 +1,6 @@
 import { Router } from "express";
-import { db, childrenTable } from "@workspace/db";
+import { db, childrenTable, eq } from "@workspace/db";
 import { CreateChildBody, GetChildParams, UpdateChildBody, UpdateChildParams } from "@workspace/api-zod";
-import { eq } from "drizzle-orm";
 import { notFound, parse } from "../lib/http";
 
 const router = Router();

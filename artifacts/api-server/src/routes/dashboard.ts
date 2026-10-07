@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { db, childrenTable, appsTable, childAppStatusTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, childrenTable, appsTable, childAppStatusTable, eq } from "@workspace/db";
 import { appMatchesChild } from "../lib/matching";
 
 const router = Router();

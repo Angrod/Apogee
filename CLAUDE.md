@@ -24,6 +24,7 @@ The current code only does the recording part. "Pushed" is a status marker. Unti
 ## Commands
 - `pnpm install --frozen-lockfile`: pnpm only
 - `pnpm run typecheck`
+- `pnpm test`: Vitest. API tests run against an in-memory Postgres (PGlite) with the real migrations; no setup needed. Vitest doesn't typecheck, so run both.
 - `pnpm --filter @workspace/api-spec run codegen`: run after editing `lib/api-spec/openapi.yaml`
 - `pnpm --filter @workspace/db run migrate` / `run seed`: needs `DATABASE_URL`
 - `pnpm --filter @workspace/db run generate --name <change>`: after editing `lib/db/src/schema/`; review and commit the SQL in `lib/db/migrations/`
@@ -37,6 +38,7 @@ The current code only does the recording part. "Pushed" is a status marker. Unti
 - Use `<Button asChild><Link/></Button>`, never a button inside a link.
 - `GET /api/dashboard` writes to the DB (it creates missing status rows).
 - The API validates with the Zod schemas generated from `openapi.yaml`. Use `parse()` and `notFound()` from `artifacts/api-server/src/lib/http.ts` in new routes; never read `req.body` directly. Orval drops `integer`, so integer fields need `multipleOf: 1`. Don't trust `z.coerce.boolean()` on query strings (`"false"` becomes `true`).
+- Import drizzle operators (`eq`, `and`, …) from `@workspace/db`, not `drizzle-orm`, so there's one drizzle instance.
 - Schema changes go through generated migrations, never `drizzle-kit push`. DB enums (`lib/db/src/schema/enums.ts`) must match `openapi.yaml`; `api-server/src/lib/contract.ts` fails the typecheck if they don't.
 - The web dev server proxies `/api` to `API_URL` (default `http://localhost:8080`), so run both processes.
 - No auth. Never commit `DATABASE_URL` or `.env` files.

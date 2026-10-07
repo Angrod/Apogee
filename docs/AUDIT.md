@@ -190,6 +190,17 @@ There was no live data to preserve, so this is a clean baseline (`lib/db/migrati
 
 Still a product decision, not a bug: `lastVerified` is set on every save, so it means "last edited."
 
+## Step 7 notes (done)
+`pnpm test` runs 41 tests in about 3 seconds, with no database to install:
+- **API (`artifacts/api-server/test/api.test.ts`, 26 tests):** the real Express app against an in-memory Postgres (PGlite) with the committed migrations applied. Covers CRUD, full-replacement PUT, every validation case, soft delete and restore, SQL filters, no DELETE routes, the per-child upsert (including 5 simultaneous writes), sibling independence, dashboard matching and row initialization, export contents, and JSON errors.
+- **Database (`test/db-constraints.test.ts`):** raw SQL that skips the API and is rejected by the enums, check constraints, unique pair, and foreign keys.
+- **Units:** the matching rule (inclusive ages, shared tags, Games ≠ Gaming), the screen-time round trip for every minute of a day, `toggled`, and the option lists.
+- **The suite catches regressions:** an age off-by-one and the `coerce.boolean` bug were planted on purpose, and both failed at the unit and API levels.
+
+Found while adding tests: PGlite as a dev dependency made pnpm install a second `drizzle-orm` (via its optional peer), which broke typechecking across packages. The API now imports drizzle operators and `migrate()` from `@workspace/db`, so there's one instance.
+
+Not automated yet: frontend behavior that needs a browser (Arcade hiding, optimistic rollback, layout). Those were verified by hand in steps 3–5. Browser tests (e.g. Playwright) would be the next layer.
+
 ## Proposed cleanup order
 
 Each step is a separate, reviewable change.
@@ -200,4 +211,4 @@ Each step is a separate, reviewable change.
 4. ✅ **Harden the API** (2.3, 2.4, 2.5): enums in the spec, validation with the generated schemas, a JSON error handler, an atomic upsert, removed or replaced DELETEs.
 5. ✅ **Consolidate** (§6): shared constants from the spec, one matching function, the `<Link>`/`<Button>` fix, one Zod version.
 6. ✅ **Data:** correct the seed entries (§3), and plan the DB fixes (interests type, legacy enum values, constraint vs. index) as a reviewed migration against a backup.
-7. **Tests:** turn HANDOFF §17 into automated checks.
+7. ✅ **Tests:** turn HANDOFF §17 into automated checks.

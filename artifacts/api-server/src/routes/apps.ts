@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, appsTable } from "@workspace/db";
+import { db, appsTable, and, arrayContains, eq, ne, type SQL } from "@workspace/db";
 import {
   CreateAppBody,
   GetAppParams,
@@ -7,7 +7,6 @@ import {
   UpdateAppBody,
   UpdateAppParams,
 } from "@workspace/api-zod";
-import { and, arrayContains, eq, ne, type SQL } from "drizzle-orm";
 import { badRequest, notFound, parse } from "../lib/http";
 
 const router = Router();

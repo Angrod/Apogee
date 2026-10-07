@@ -4,10 +4,16 @@
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
     "outDir": "dist",
-    "rootDir": "src",
-    "types": ["node"]
+    "rootDir": ".",
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src"],
+  "include": [
+    "src",
+    "test",
+    "vitest.config.ts"
+  ],
   "references": [
     {
       "path": "../../lib/db"

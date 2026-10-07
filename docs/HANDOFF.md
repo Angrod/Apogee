@@ -444,20 +444,22 @@ Commercial readiness would require:
 
 ## 17. Acceptance checks for future changes
 
-- Add/edit a child; confirm changes survive refresh.
-- Enter 1.5 weekday hours; confirm storage/export uses 90 minutes.
-- Toggle Arcade; confirm only exact Games-category matches are hidden.
-- Add an age-appropriate app with a shared tag; confirm it matches the expected child.
-- Test an age boundary and an app/child with no shared interests.
-- Change one child's app status; confirm siblings are unchanged.
-- Refresh after a status change; confirm persistence.
-- Simulate a failed write; confirm the old status is restored.
-- Remove a catalog app; confirm its record and notes remain and recommendations exclude it.
-- Restore the catalog app; confirm matching resumes.
+Run `pnpm test`. It starts an in-memory Postgres with the real migrations, so nothing needs to be installed. ✅ marks checks the suite covers; the rest are still manual.
+
+- ✅ Add/edit a child; changes persist (API).
+- ✅ 1.5 hours is stored as 90 minutes, and every whole minute round-trips exactly.
+- Toggle Arcade; confirm only exact Games-category matches are hidden (frontend display logic, manual).
+- ✅ An age-appropriate app with a shared tag matches the expected child.
+- ✅ Age boundaries are inclusive; no shared interest means no match; Games ≠ Gaming.
+- ✅ Changing one child's app status leaves siblings unchanged.
+- ✅ Status changes persist (upsert keeps one row per pair, even under simultaneous writes).
+- Simulate a failed write; confirm the old status is restored (frontend, manual; verified by hand on 2026-10-07).
+- ✅ A Removed catalog app keeps its record and notes and leaves recommendations.
+- ✅ Restoring the catalog app brings the match back.
 - Check child-app removal/restoration once a restoration UI exists.
-- Export; verify all three arrays, removed records, and matching IDs.
-- Confirm the ten starter apps are actual database rows.
-- Test narrow-screen navigation and the three-column desktop view.
+- ✅ Export contains all three collections, including Removed apps.
+- ✅ The database itself rejects invalid enums, ranges, duplicate pairs, and bad references.
+- Test narrow-screen navigation and the three-column desktop view (manual).
 - Verify unauthenticated access is blocked before exposing real data publicly.
 - Inspect migration plans on a backup or disposable database before applying them to valuable data.
 

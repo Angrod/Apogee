@@ -31,6 +31,8 @@ export DATABASE_URL=postgres://...         # never commit this
 pnpm --filter @workspace/db run migrate    # apply versioned migrations
 pnpm --filter @workspace/db run seed
 
+pnpm test                                  # no database needed
+
 PORT=8080 pnpm --filter @workspace/api-server run dev
 PORT=3000 BASE_PATH=/ pnpm --filter @workspace/apogee run dev
 ```

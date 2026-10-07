@@ -1,4 +1,6 @@
+import path from "node:path";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate as runMigrations } from "drizzle-orm/node-postgres/migrator";
 import pg from "pg";
 import * as schema from "./schema";
 
@@ -19,5 +21,14 @@ pool.on("error", (err) => {
   console.error("Postgres pool error (idle client discarded):", err.message);
 });
 export const db = drizzle(pool, { schema });
+
+// Apply the committed migrations in lib/db/migrations.
+export function migrate() {
+  return runMigrations(db, { migrationsFolder: path.resolve(import.meta.dirname, "../migrations") });
+}
+
+// Query operators, re-exported so callers share this package's single
+// drizzle-orm instance instead of resolving their own copy.
+export { and, arrayContains, eq, ne, type SQL } from "drizzle-orm";
 
 export * from "./schema";

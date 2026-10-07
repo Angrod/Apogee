@@ -5,10 +5,10 @@ What's being worked on, what's next, and what's waiting on someone outside the c
 _Last updated: 2026-10-07_
 
 ## Now
-**Code cleanup.** The audit is done: see [AUDIT.md](AUDIT.md). Next is working through its 7-step cleanup order, one approved step at a time. Steps 1–6 are done (build on macOS, remove bloat, fix frontend bugs, harden the API, consolidate, data and migrations). Next is step 7: automated tests.
+**Cleanup is complete.** All 7 steps of [AUDIT.md](AUDIT.md) are done: it builds on macOS, the bloat is removed, the bugs are fixed, the API and DB are hardened, migrations are versioned, and `pnpm test` runs the suite. Pick the next item below.
 
 ## Next (in order, each needs approval before starting)
-1. **Local Postgres** so the app runs fully off Replit (the proxy and build fixes are in the cleanup).
+1. **Local Postgres** for day-to-day use (tests already run without one). Postgres.app or Homebrew, then `migrate` and `seed`.
 2. **Remaining handoff gaps** not covered by the cleanup ([HANDOFF.md §16](HANDOFF.md#16-work-completed-and-work-still-open)): soft-delete-only API, server-side validation, an atomic status upsert, dashboard cache invalidation, and a way to restore child-app "Removed" rows.
 3. **Authentication.** Required before anything leaves the local network or a native app talks to the API.
 4. **Screen Time app spike.** A minimal native iOS app using FamilyControls, built as a development build on one of this household's iPads. It proves authorization, blocking one app, and a downtime schedule.
