@@ -23,13 +23,11 @@ The current code only does the recording part. "Pushed" is a status marker. Unti
 
 ## Commands
 - `pnpm install --frozen-lockfile`: pnpm only
+- `pnpm dev`: API (:8080) + web (:3000) together; reads `DATABASE_URL` from the root `.env` (see `.env.example`). Local Postgres is Homebrew `postgresql@18`, database `apogee`.
+- `pnpm db:migrate` / `pnpm db:seed` (`--with-sample-children` for test profiles) / `pnpm db:generate --name <change>`
 - `pnpm run typecheck`
 - `pnpm test`: Vitest. API tests run against an in-memory Postgres (PGlite) with the real migrations; no setup needed. Vitest doesn't typecheck, so run both.
 - `pnpm --filter @workspace/api-spec run codegen`: run after editing `lib/api-spec/openapi.yaml`
-- `pnpm --filter @workspace/db run migrate` / `run seed`: needs `DATABASE_URL`
-- `pnpm --filter @workspace/db run generate --name <change>`: after editing `lib/db/src/schema/`; review and commit the SQL in `lib/db/migrations/`
-- API: `PORT=8080 pnpm --filter @workspace/api-server run dev`
-- Web: `PORT=3000 BASE_PATH=/ pnpm --filter @workspace/apogee run dev`
 
 ## Gotchas
 - Change the OpenAPI spec first, then regenerate. Never hand-edit generated code in `lib/api-client-react` or `lib/api-zod`. Keep the OpenAPI title stable.
@@ -39,6 +37,7 @@ The current code only does the recording part. "Pushed" is a status marker. Unti
 - `GET /api/dashboard` writes to the DB (it creates missing status rows).
 - The API validates with the Zod schemas generated from `openapi.yaml`. Use `parse()` and `notFound()` from `artifacts/api-server/src/lib/http.ts` in new routes; never read `req.body` directly. Orval drops `integer`, so integer fields need `multipleOf: 1`. Don't trust `z.coerce.boolean()` on query strings (`"false"` becomes `true`).
 - Import drizzle operators (`eq`, `and`, …) from `@workspace/db`, not `drizzle-orm`, so there's one drizzle instance.
+- When stopping dev servers, kill by port (`lsof -tiTCP:3000 -sTCP:LISTEN`), not by a `vite` name pattern: other projects on this machine run Vite too.
 - Schema changes go through generated migrations, never `drizzle-kit push`. DB enums (`lib/db/src/schema/enums.ts`) must match `openapi.yaml`; `api-server/src/lib/contract.ts` fails the typecheck if they don't.
 - The web dev server proxies `/api` to `API_URL` (default `http://localhost:8080`), so run both processes.
 - No auth. Never commit `DATABASE_URL` or `.env` files.

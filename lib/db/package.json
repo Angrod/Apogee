@@ -10,7 +10,7 @@
   "scripts": {
     "generate": "drizzle-kit generate --config ./drizzle.config.ts",
     "migrate": "drizzle-kit migrate --config ./drizzle.config.ts",
-    "seed": "node --import tsx/esm src/seed.ts"
+    "seed": "node --env-file-if-exists=../../.env --import tsx/esm src/seed.ts"
   },
   "dependencies": {
     "drizzle-orm": "catalog:",

@@ -24,20 +24,25 @@ docs/                   Handoff guide + original brief
 
 ## Quick start
 
+One-time setup (macOS):
+
 ```sh
+brew install postgresql@18 && brew services start postgresql@18
+/opt/homebrew/opt/postgresql@18/bin/createdb apogee
+cp .env.example .env                       # DATABASE_URL for the local DB (gitignored)
 pnpm install --frozen-lockfile
-export DATABASE_URL=postgres://...         # never commit this
-
-pnpm --filter @workspace/db run migrate    # apply versioned migrations
-pnpm --filter @workspace/db run seed
-
-pnpm test                                  # no database needed
-
-PORT=8080 pnpm --filter @workspace/api-server run dev
-PORT=3000 BASE_PATH=/ pnpm --filter @workspace/apogee run dev
+pnpm db:migrate                            # apply versioned migrations
+pnpm db:seed                               # starter catalog (add --with-sample-children for test profiles)
 ```
 
-The frontend calls `/api` on its own origin and no local proxy exists yet, so outside Replit you need to route `/api/*` to port 8080. See [docs/HANDOFF.md §14](docs/HANDOFF.md#14-running-and-building).
+Day to day:
+
+```sh
+pnpm dev        # API on :8080 and web on http://localhost:3000 (proxies /api)
+pnpm test       # 41 tests; uses an in-memory Postgres, no setup needed
+```
+
+To use it from your phone on the home network, start with `HOST=0.0.0.0 pnpm dev` and open `http://<your-mac's-IP>:3000`. There's no login yet, so only do this on a network you trust.
 
 ## Docs
 

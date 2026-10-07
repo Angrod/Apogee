@@ -157,6 +157,10 @@ const seedChildren: NewChild[] = [
 
 // Inserts rows whose name doesn't exist yet. Never overwrites existing rows,
 // so it's safe to re-run; it is not a way to update catalog entries.
+// Sample children are opt-in (`--with-sample-children`): children can't be
+// deleted through the app, so they shouldn't land in a real database by default.
+const withSampleChildren = process.argv.includes("--with-sample-children");
+
 async function seed() {
   for (const app of seedApps) {
     const existing = await db.select().from(appsTable).where(eq(appsTable.name, app.name));
@@ -168,6 +172,10 @@ async function seed() {
     }
   }
 
+  if (!withSampleChildren) {
+    console.log("  sample children skipped (pass --with-sample-children to add them)");
+    return;
+  }
   for (const child of seedChildren) {
     const existing = await db.select().from(childrenTable).where(eq(childrenTable.name, child.name));
     if (existing.length === 0) {

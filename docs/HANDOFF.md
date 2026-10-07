@@ -359,17 +359,13 @@ The schema is versioned in `lib/db/migrations/`. To change it: edit `lib/db/src/
 
 ### Running locally
 
-There is no root `dev` script. Run the API and frontend separately:
+Put `DATABASE_URL` in a repo-root `.env` (copy `.env.example`; it's gitignored). The API dev server, migrations, and seed read it. Then:
 
 ```sh
-# Terminal 1: API
-PORT=8080 pnpm --filter @workspace/api-server run dev
-
-# Terminal 2: frontend
-PORT=3000 BASE_PATH=/ pnpm --filter @workspace/apogee run dev
+pnpm dev        # API on :8080 (tsx watch) and web on :3000, in parallel
 ```
 
-The browser calls `/api/...` on the frontend origin. In Replit, the platform router handled this. Locally, the Vite dev server now proxies `/api` to `API_URL` (default `http://localhost:8080`). In production you still need a reverse proxy so that:
+The ports default to 8080/3000 and `BASE_PATH` to `/`; `PORT` still overrides them for hosting. The browser calls `/api/...` on the frontend origin, and the Vite dev server proxies `/api` to `API_URL` (default `http://localhost:8080`). In production you still need a reverse proxy so that:
 
 ```
 /api/*  -> Express API (preserving the /api prefix)
