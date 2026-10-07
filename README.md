@@ -41,6 +41,7 @@ The frontend calls `/api` on its own origin and no local proxy exists yet, so ou
 
 - [docs/HANDOFF.md](docs/HANDOFF.md): full usage guide, architecture, API reference, known gaps
 - [docs/ROADMAP.md](docs/ROADMAP.md): current focus and what's next
+- [docs/AUDIT.md](docs/AUDIT.md): code audit of the Replit build and the cleanup plan
 - [docs/DECISIONS.md](docs/DECISIONS.md): device-control decision and the research behind it (MDM, ABM, Screen Time API)
 - [docs/original-brief.md](docs/original-brief.md): the original Stage 1 product brief
 

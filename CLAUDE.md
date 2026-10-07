@@ -5,6 +5,7 @@ An MDM for parents: Jamf Pro-style app curation and device management, built for
 ## Read first
 - `docs/ROADMAP.md`: what's being worked on now and what's next.
 - `docs/DECISIONS.md`: how device control will work and why.
+- `docs/AUDIT.md`: known bugs, bloat, and the cleanup order.
 - `docs/HANDOFF.md`: how the current app works (architecture, API, known gaps).
 - `docs/original-brief.md`: the original Stage 1 brief.
 
@@ -29,6 +30,7 @@ The current code only does the recording part. "Pushed" is a status marker. Unti
 - Web: `PORT=3000 BASE_PATH=/ pnpm --filter @workspace/apogee run dev`
 
 ## Gotchas
+- **Local builds are broken on macOS** until AUDIT §1.1 is fixed (`pnpm-workspace.yaml` overrides strip the darwin-arm64 esbuild/rollup binaries). `tsc` still works.
 - Change the OpenAPI spec first, then regenerate. Never hand-edit generated code in `lib/api-client-react` or `lib/api-zod`. Keep the OpenAPI title stable.
 - Screen time is stored in minutes; the UI shows hours.
 - `GET /api/dashboard` writes to the DB (it creates missing status rows).

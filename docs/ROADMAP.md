@@ -5,11 +5,11 @@ What's being worked on, what's next, and what's waiting on someone outside the c
 _Last updated: 2026-10-07_
 
 ## Now
-**Code cleanup audit.** Go through everything Replit generated: what each piece does, whether it's correct, and what to fix or remove (unused packages, the mockup sandbox, Replit-only config, dead code). Output: a findings report, then approved fixes.
+**Code cleanup.** The audit is done: see [AUDIT.md](AUDIT.md). Next is working through its 7-step cleanup order, one approved step at a time. Step 1 (make it build and run on macOS) blocks everything else.
 
 ## Next (in order, each needs approval before starting)
-1. **Local development setup.** A Vite `/api` proxy and a local Postgres, so the app runs off Replit.
-2. **Fix known gaps from the handoff** ([HANDOFF.md §16](HANDOFF.md#16-work-completed-and-work-still-open)): soft-delete-only API, server-side validation, an atomic status upsert, dashboard cache invalidation, and a way to restore child-app "Removed" rows.
+1. **Local Postgres** so the app runs fully off Replit (the proxy and build fixes are in the cleanup).
+2. **Remaining handoff gaps** not covered by the cleanup ([HANDOFF.md §16](HANDOFF.md#16-work-completed-and-work-still-open)): soft-delete-only API, server-side validation, an atomic status upsert, dashboard cache invalidation, and a way to restore child-app "Removed" rows.
 3. **Authentication.** Required before anything leaves the local network or a native app talks to the API.
 4. **Screen Time app spike.** A minimal native iOS app using FamilyControls, built as a development build on one of this household's iPads. It proves authorization, blocking one app, and a downtime schedule.
 5. **Connect Apogee to the Screen Time app.** The native app reads the child's profile and catalog from the Apogee API.
