@@ -10,7 +10,9 @@ import {
   useUpdateChild,
   getListChildrenQueryKey,
   getGetChildQueryKey,
+  getGetDashboardQueryKey,
 } from "@workspace/api-client-react";
+import type { Child } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeftIcon, CheckIcon } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { minutesToHours, hoursToMinutes } from "@/lib/screen-time";
 
 const INTEREST_TAGS = [
   "Engineering",
@@ -108,14 +111,25 @@ function ChildFormContent({ childId }: { childId?: number }) {
 
   const isEditing = childId !== undefined;
 
-  const { data: existingChild, isLoading: isLoadingChild } = useGetChild(childId ?? 0, {
+  const {
+    data: existingChild,
+    isError: isChildError,
+  } = useGetChild(childId ?? 0, {
     query: { enabled: isEditing, queryKey: getGetChildQueryKey(childId ?? 0) },
   });
 
+  // Keep every view of children in sync after a save. Writing the saved record
+  // into its own cache entry stops a reopened form from showing pre-save values.
+  function syncAfterSave(saved: Child) {
+    queryClient.setQueryData(getGetChildQueryKey(saved.id), saved);
+    queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
+  }
+
   const createMutation = useCreateChild({
     mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() });
+      onSuccess: (saved) => {
+        syncAfterSave(saved);
         toast({ title: "Child profile created" });
         navigate("/children");
       },
@@ -127,8 +141,8 @@ function ChildFormContent({ childId }: { childId?: number }) {
 
   const updateMutation = useUpdateChild({
     mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() });
+      onSuccess: (saved) => {
+        syncAfterSave(saved);
         toast({ title: "Profile saved" });
         navigate("/children");
       },
@@ -165,8 +179,8 @@ function ChildFormContent({ childId }: { childId?: number }) {
         age: existingChild.age,
         deviceName: existingChild.deviceName,
         interests: (existingChild.interests as string[]) ?? [],
-        screenTimeWeekday: Math.round((existingChild.screenTimeWeekday / 60) * 10) / 10,
-        screenTimeWeekend: Math.round((existingChild.screenTimeWeekend / 60) * 10) / 10,
+        screenTimeWeekday: minutesToHours(existingChild.screenTimeWeekday),
+        screenTimeWeekend: minutesToHours(existingChild.screenTimeWeekend),
         appleArcade: existingChild.appleArcade,
       });
     }
@@ -190,19 +204,24 @@ function ChildFormContent({ childId }: { childId?: number }) {
       age: values.age,
       deviceName: values.deviceName,
       interests: values.interests,
-      screenTimeWeekday: Math.round(values.screenTimeWeekday * 60),
-      screenTimeWeekend: Math.round(values.screenTimeWeekend * 60),
+      screenTimeWeekday: hoursToMinutes(values.screenTimeWeekday),
+      screenTimeWeekend: hoursToMinutes(values.screenTimeWeekend),
       appleArcade: values.appleArcade,
     };
 
-    if (isEditing && childId) {
+    if (childId !== undefined) {
       updateMutation.mutate({ id: childId, data: payload });
     } else {
       createMutation.mutate({ data: payload });
     }
   }
 
-  if (isEditing && isLoadingChild) {
+  if (isEditing && isChildError) {
+    return <MissingRecord />;
+  }
+
+  // Only show the edit form once the record has loaded, so it never opens empty.
+  if (isEditing && !existingChild) {
     return (
       <div className="space-y-4">
         {[1, 2, 3, 4].map((i) => (
@@ -257,7 +276,7 @@ function ChildFormContent({ childId }: { childId?: number }) {
           <Input
             {...register("screenTimeWeekday", { valueAsNumber: true })}
             type="number"
-            step="0.25"
+            step="any"
             min={0}
             max={24}
             placeholder="2"
@@ -273,7 +292,7 @@ function ChildFormContent({ childId }: { childId?: number }) {
           <Input
             {...register("screenTimeWeekend", { valueAsNumber: true })}
             type="number"
-            step="0.25"
+            step="any"
             min={0}
             max={24}
             placeholder="3"
@@ -328,10 +347,22 @@ function ChildFormContent({ childId }: { childId?: number }) {
   );
 }
 
+function MissingRecord() {
+  return (
+    <div className="text-center py-8 text-stone-500">
+      <p className="font-medium mb-1">This profile doesn't exist.</p>
+      <Link href="/children" className="text-sm text-amber-700 hover:text-amber-900">
+        Back to Children
+      </Link>
+    </div>
+  );
+}
+
 export default function ChildFormPage() {
   const params = useParams<{ id?: string }>();
   const isNew = !params.id || params.id === "new";
-  const childId = isNew ? undefined : parseInt(params.id!, 10);
+  const childId = isNew ? undefined : Number(params.id);
+  const isValidId = isNew || (Number.isInteger(childId) && childId! > 0);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -349,7 +380,7 @@ export default function ChildFormPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-stone-200 p-6">
-        <ChildFormContent childId={childId} />
+        {isValidId ? <ChildFormContent childId={childId} /> : <MissingRecord />}
       </div>
     </div>
   );

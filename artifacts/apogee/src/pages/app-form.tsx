@@ -10,8 +10,9 @@ import {
   useUpdateApp,
   getListAppsQueryKey,
   getGetAppQueryKey,
-  type ListAppsParams,
+  getGetDashboardQueryKey,
 } from "@workspace/api-client-react";
+import type { CatalogApp } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -145,15 +146,26 @@ function AppFormContent({ appId }: { appId?: number }) {
 
   const isEditing = appId !== undefined;
 
-  const { data: existingApp, isLoading: isLoadingApp } = useGetApp(appId ?? 0, {
+  const {
+    data: existingApp,
+    isError: isAppError,
+  } = useGetApp(appId ?? 0, {
     query: { enabled: isEditing, queryKey: getGetAppQueryKey(appId ?? 0) },
   });
 
+  // Keep every view of the catalog in sync after a save. Writing the saved record
+  // into its own cache entry stops a reopened form from showing pre-save values.
+  // The list key without params is a prefix of every filtered variant.
+  function syncAfterSave(saved: CatalogApp) {
+    queryClient.setQueryData(getGetAppQueryKey(saved.id), saved);
+    queryClient.invalidateQueries({ queryKey: getListAppsQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
+  }
+
   const createMutation = useCreateApp({
     mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListAppsQueryKey() });
-        queryClient.invalidateQueries({ queryKey: getListAppsQueryKey({ includeRemoved: true } as ListAppsParams) });
+      onSuccess: (saved) => {
+        syncAfterSave(saved);
         toast({ title: "App added to catalog" });
         navigate("/catalog");
       },
@@ -165,9 +177,8 @@ function AppFormContent({ appId }: { appId?: number }) {
 
   const updateMutation = useUpdateApp({
     mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListAppsQueryKey() });
-        queryClient.invalidateQueries({ queryKey: getListAppsQueryKey({ includeRemoved: true } as ListAppsParams) });
+      onSuccess: (saved) => {
+        syncAfterSave(saved);
         toast({ title: "App saved" });
         navigate("/catalog");
       },
@@ -246,14 +257,19 @@ function AppFormContent({ appId }: { appId?: number }) {
       status: values.status,
     };
 
-    if (isEditing && appId) {
+    if (appId !== undefined) {
       updateMutation.mutate({ id: appId, data: payload });
     } else {
       createMutation.mutate({ data: payload });
     }
   }
 
-  if (isEditing && isLoadingApp) {
+  if (isEditing && isAppError) {
+    return <MissingRecord />;
+  }
+
+  // Only show the edit form once the record has loaded, so it never opens empty.
+  if (isEditing && !existingApp) {
     return (
       <div className="space-y-4">
         {[1, 2, 3, 4, 5].map((i) => (
@@ -397,10 +413,22 @@ function AppFormContent({ appId }: { appId?: number }) {
   );
 }
 
+function MissingRecord() {
+  return (
+    <div className="text-center py-8 text-stone-500">
+      <p className="font-medium mb-1">This app isn't in the catalog.</p>
+      <Link href="/catalog" className="text-sm text-amber-700 hover:text-amber-900">
+        Back to Catalog
+      </Link>
+    </div>
+  );
+}
+
 export default function AppFormPage() {
   const params = useParams<{ id?: string }>();
   const isNew = !params.id || params.id === "new";
-  const appId = isNew ? undefined : parseInt(params.id!, 10);
+  const appId = isNew ? undefined : Number(params.id);
+  const isValidId = isNew || (Number.isInteger(appId) && appId! > 0);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -420,7 +448,7 @@ export default function AppFormPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-stone-200 p-6">
-        <AppFormContent appId={appId} />
+        {isValidId ? <AppFormContent appId={appId} /> : <MissingRecord />}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLinkIcon, RocketIcon, GamepadIcon } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const STATUS_ORDER = ["Pushed", "Installed", "Not Installed", "Removed"] as const;
 type AppStatus = (typeof STATUS_ORDER)[number];
@@ -226,6 +227,7 @@ function ColumnSkeleton() {
 
 export default function Dashboard() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [statusOverrides, setStatusOverrides] = useState<Map<string, AppStatus>>(new Map());
   const [mutatingKeys, setMutatingKeys] = useState<Set<string>>(new Set());
 
@@ -253,8 +255,10 @@ export default function Dashboard() {
       updateStatus.mutate(
         { childId, appId, data: { status: newStatus } },
         {
-          onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
+          onSuccess: async () => {
+            // Keep the optimistic value on screen until fresh data has arrived;
+            // clearing it first briefly shows the old cached status.
+            await queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
             setStatusOverrides((prev) => {
               const next = new Map(prev);
               next.delete(key);
@@ -262,6 +266,7 @@ export default function Dashboard() {
             });
           },
           onError: () => {
+            toast({ title: "Couldn't update status", variant: "destructive" });
             setStatusOverrides((prev) => {
               const next = new Map(prev);
               if (previousStatus !== undefined) {
@@ -282,7 +287,7 @@ export default function Dashboard() {
         }
       );
     },
-    [updateStatus, queryClient, statusOverrides]
+    [updateStatus, queryClient, statusOverrides, toast]
   );
 
   return (

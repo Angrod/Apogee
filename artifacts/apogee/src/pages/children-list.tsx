@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlusIcon, ClockIcon, TabletSmartphoneIcon, SparklesIcon } from "lucide-react";
+import { formatHours } from "@/lib/screen-time";
 
 function InterestBadge({ tag }: { tag: string }) {
   return (
@@ -15,9 +16,6 @@ function InterestBadge({ tag }: { tag: string }) {
 }
 
 function ChildCard({ child }: { child: { id: number; name: string; age: number; deviceName: string; interests: string[]; screenTimeWeekday: number; screenTimeWeekend: number; appleArcade: boolean } }) {
-  const weekdayHours = (child.screenTimeWeekday / 60).toFixed(1);
-  const weekendHours = (child.screenTimeWeekend / 60).toFixed(1);
-
   return (
     <Card className="border-stone-200 hover:border-amber-300 transition-colors">
       <CardHeader className="pb-3">
@@ -42,7 +40,7 @@ function ChildCard({ child }: { child: { id: number; name: string; age: number; 
         <div className="flex items-center gap-2 text-sm text-stone-600">
           <ClockIcon className="h-3.5 w-3.5 text-stone-400 shrink-0" />
           <span>
-            {weekdayHours}h weekdays · {weekendHours}h weekends
+            {formatHours(child.screenTimeWeekday)} weekdays · {formatHours(child.screenTimeWeekend)} weekends
           </span>
         </div>
 

@@ -9,13 +9,15 @@ import ChildrenList from "@/pages/children-list";
 import ChildFormPage from "@/pages/child-form";
 import Catalog from "@/pages/catalog";
 import AppFormPage from "@/pages/app-form";
-import { exportData } from "@workspace/api-client-react";
+import { exportData, ApiError } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      // Retry once for network or server errors; a 4xx (e.g. 404) won't change on retry.
+      retry: (failureCount, error) =>
+        failureCount < 1 && !(error instanceof ApiError && error.status < 500),
       staleTime: 30_000,
     },
   },

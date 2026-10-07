@@ -30,10 +30,10 @@ The browser calls `/api/...` on the web app's own origin. On Replit, the platfor
 
 ## 2. Bugs
 
-### 🟠 2.1 Editing twice within 30 seconds can overwrite your changes
+### ✅ 2.1 Editing twice within 30 seconds can overwrite your changes
 `artifacts/apogee/src/pages/child-form.tsx:128` and `app-form.tsx:166`. A save only invalidates the **list** query, not the single-record query (`getGetChildQueryKey` / `getGetAppQueryKey`). The global `staleTime` is 30s (`App.tsx:20`), so reopening the same record within 30 seconds fills the form with the **pre-save values** from cache. Saving again writes those old values back. **Fix:** invalidate (or set) the record query on success.
 
-### 🟠 2.2 Screen-time values drift on every edit
+### ✅ 2.2 Screen-time values drift on every edit
 `child-form.tsx:168` rounds stored minutes to **0.1 hour** for display, while the input step is **0.25 hour** (line 260). For example, 1.25 h is stored as 75 min, displayed as 1.3, and saved back as 78 min. **Fix:** don't round to 0.1. Show minutes directly or keep exact decimals.
 
 ### 🟠 2.3 The API trusts every request body
@@ -51,13 +51,13 @@ None of the routes validate input. The generated Zod schemas (`@workspace/api-zo
 ### 🟠 2.5 Status updates aren't atomic
 `routes/child-app-status.ts:12`: select, then insert or update. Two first writes at the same moment can hit the unique index and 500. It also doesn't check that the child and app exist. **Fix:** a single `insert … onConflictDoUpdate`.
 
-### 🟠 2.6 The dashboard briefly shows the old status after a change
+### ✅ 2.6 The dashboard briefly shows the old status after a change
 `dashboard.tsx:256`. On success, the optimistic override is cleared **immediately**, while the refetch isn't awaited. For a moment the card shows the old cached status again. Failed changes give no message to the user. **Fix:** await the invalidation (or write the result into the cache) before clearing the override, and show a toast on error.
 
-### 🟠 2.7 The dashboard doesn't refresh after catalog or profile edits
+### ✅ 2.7 The dashboard doesn't refresh after catalog or profile edits
 App and child saves don't invalidate the dashboard query, so new matches can take up to 30 seconds to appear (already listed in HANDOFF §6).
 
-### 🟠 2.8 Bad record IDs in the URL can create duplicates
+### ✅ 2.8 Bad record IDs in the URL can create duplicates
 `child-form.tsx:334` / `app-form.tsx:403`. `/children/abc` gives `NaN`, which counts as "editing" but shows an empty form. Then `if (isEditing && childId)` is false because `NaN` is falsy, so **Save creates a new record**. A missing ID (404) also shows an empty form instead of "not found."
 
 ### 🟠 2.9 Automatic schema push on merge
@@ -141,13 +141,23 @@ Kept on purpose:
 - The server-side catalog filters.
 - The orange-square `favicon.svg` placeholder (it needs a real icon).
 
+## Step 3 notes (done)
+Fixed 2.1, 2.2, 2.6, 2.7, and 2.8, and verified each in a browser against a throwaway Postgres.
+- Saves now write the record into its own cache entry and refresh the list and dashboard.
+- Screen time converts through `src/lib/screen-time.ts`, which round-trips every whole minute exactly. The old code changed 1,200 of the 1,441 values in a day (0–1440 minutes) on save.
+- The dashboard keeps the new status on screen until fresh data arrives, and shows a toast on failure.
+
+Found during testing: React Query pauses retries while the tab is unfocused, and the forms then rendered an **empty edit form** for a record that hadn't loaded. Fixes:
+- Edit forms now render only after the record loads.
+- 4xx responses are no longer retried (global `retry` in `App.tsx`; `ApiError` is now exported from `@workspace/api-client-react`).
+
 ## Proposed cleanup order
 
 Each step is a separate, reviewable change.
 
 1. ✅ **Make it run locally:** fix the workspace overrides and lockfile (1.1) and add the Vite `/api` proxy (1.2). Without this nothing else can be tested.
 2. ✅ **Remove Replit leftovers and bloat** (§4, §5): mockup sandbox, unused UI and packages, Replit config and plugins, `index.html` placeholders, `noindex`. Pure deletion; verified by typecheck, build, and clicking through.
-3. **Fix the data-loss and drift bugs** (2.1, 2.2, 2.6, 2.7, 2.8): frontend only.
+3. ✅ **Fix the data-loss and drift bugs** (2.1, 2.2, 2.6, 2.7, 2.8): frontend only.
 4. **Harden the API** (2.3, 2.4, 2.5): enums in the spec, validation with the generated schemas, a JSON error handler, an atomic upsert, removed or replaced DELETEs.
 5. **Consolidate** (§6): shared constants from the spec, one matching function, the `<Link>`/`<Button>` fix, one Zod version.
 6. **Data:** correct the seed entries (§3), and plan the DB fixes (interests type, legacy enum values, constraint vs. index) as a reviewed migration against a backup.
