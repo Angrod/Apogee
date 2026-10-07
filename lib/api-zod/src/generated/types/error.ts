@@ -5,8 +5,8 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { InstallStatus } from './installStatus';
 
-export interface ChildAppStatusInput {
-  status: InstallStatus;
+export interface Error {
+  error: string;
+  details?: string[];
 }

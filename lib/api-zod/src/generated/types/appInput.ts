@@ -5,16 +5,30 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { AdStatus } from './adStatus';
+import type { CatalogStatus } from './catalogStatus';
+import type { Category } from './category';
+import type { CostModel } from './costModel';
+import type { InterestTag } from './interestTag';
 
 export interface AppInput {
+  /** @minLength 1 */
   name: string;
   appStoreUrl: string;
-  category: string;
+  category: Category;
+  /**
+     * @minimum 0
+     * @maximum 17
+     */
   ageMin: number;
+  /**
+     * @minimum 0
+     * @maximum 17
+     */
   ageMax: number;
-  interestTags: string[];
-  costModel: string;
-  adStatus: string;
-  notes?: string;
-  status?: string;
+  interestTags: InterestTag[];
+  costModel: CostModel;
+  adStatus: AdStatus;
+  notes: string;
+  status: CatalogStatus;
 }

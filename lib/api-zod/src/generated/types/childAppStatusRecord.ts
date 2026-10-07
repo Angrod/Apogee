@@ -5,12 +5,13 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { InstallStatus } from './installStatus';
 
 export interface ChildAppStatusRecord {
   id: number;
   childId: number;
   appId: number;
-  status: string;
+  status: InstallStatus;
   createdAt: string;
   updatedAt: string;
 }

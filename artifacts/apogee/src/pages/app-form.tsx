@@ -52,7 +52,7 @@ const schema = z.object({
     .int()
     .min(0)
     .max(17),
-  interestTags: z.array(z.string()).default([]),
+  interestTags: z.array(z.enum(INTEREST_TAGS)).default([]),
   costModel: z.enum(COST_MODELS, { required_error: "Cost model is required" }),
   adStatus: z.enum(AD_STATUSES, { required_error: "Ad status is required" }),
   notes: z.string().default(""),
@@ -63,15 +63,16 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
+type InterestTag = (typeof INTEREST_TAGS)[number];
 
 function InterestToggle({
   tag,
   selected,
   onToggle,
 }: {
-  tag: string;
+  tag: InterestTag;
   selected: boolean;
-  onToggle: (tag: string) => void;
+  onToggle: (tag: InterestTag) => void;
 }) {
   return (
     <button
@@ -234,7 +235,7 @@ function AppFormContent({ appId }: { appId?: number }) {
   const adStatus = watch("adStatus");
   const status = watch("status");
 
-  function toggleTag(tag: string) {
+  function toggleTag(tag: InterestTag) {
     const current = interestTags;
     if (current.includes(tag)) {
       setValue("interestTags", current.filter((t) => t !== tag));

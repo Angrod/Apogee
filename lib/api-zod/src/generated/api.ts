@@ -20,14 +20,31 @@ export const HealthCheckResponse = zod.object({
 /**
  * @summary List all children
  */
+export const listChildrenResponseIdMultipleOf = 1;
+
+
+export const listChildrenResponseAgeMax = 17;
+export const listChildrenResponseAgeMultipleOf = 1;
+
+
+export const listChildrenResponseScreenTimeWeekdayMin = 0;
+export const listChildrenResponseScreenTimeWeekdayMax = 1440;
+export const listChildrenResponseScreenTimeWeekdayMultipleOf = 1;
+
+export const listChildrenResponseScreenTimeWeekendMin = 0;
+export const listChildrenResponseScreenTimeWeekendMax = 1440;
+export const listChildrenResponseScreenTimeWeekendMultipleOf = 1;
+
+
+
 export const ListChildrenResponseItem = zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "age": zod.number(),
-  "interests": zod.array(zod.string()),
-  "deviceName": zod.string(),
-  "screenTimeWeekday": zod.number(),
-  "screenTimeWeekend": zod.number(),
+  "id": zod.number().multipleOf(listChildrenResponseIdMultipleOf),
+  "name": zod.string().min(1),
+  "age": zod.number().min(1).max(listChildrenResponseAgeMax).multipleOf(listChildrenResponseAgeMultipleOf),
+  "interests": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "deviceName": zod.string().min(1),
+  "screenTimeWeekday": zod.number().min(listChildrenResponseScreenTimeWeekdayMin).max(listChildrenResponseScreenTimeWeekdayMax).multipleOf(listChildrenResponseScreenTimeWeekdayMultipleOf),
+  "screenTimeWeekend": zod.number().min(listChildrenResponseScreenTimeWeekendMin).max(listChildrenResponseScreenTimeWeekendMax).multipleOf(listChildrenResponseScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
@@ -38,13 +55,28 @@ export const ListChildrenResponse = zod.array(ListChildrenResponseItem)
 /**
  * @summary Create a child profile
  */
+
+export const createChildBodyAgeMax = 17;
+export const createChildBodyAgeMultipleOf = 1;
+
+
+export const createChildBodyScreenTimeWeekdayMin = 0;
+export const createChildBodyScreenTimeWeekdayMax = 1440;
+export const createChildBodyScreenTimeWeekdayMultipleOf = 1;
+
+export const createChildBodyScreenTimeWeekendMin = 0;
+export const createChildBodyScreenTimeWeekendMax = 1440;
+export const createChildBodyScreenTimeWeekendMultipleOf = 1;
+
+
+
 export const CreateChildBody = zod.object({
-  "name": zod.string(),
-  "age": zod.number(),
-  "interests": zod.array(zod.string()),
-  "deviceName": zod.string(),
-  "screenTimeWeekday": zod.number(),
-  "screenTimeWeekend": zod.number(),
+  "name": zod.string().min(1),
+  "age": zod.number().min(1).max(createChildBodyAgeMax).multipleOf(createChildBodyAgeMultipleOf),
+  "interests": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "deviceName": zod.string().min(1),
+  "screenTimeWeekday": zod.number().min(createChildBodyScreenTimeWeekdayMin).max(createChildBodyScreenTimeWeekdayMax).multipleOf(createChildBodyScreenTimeWeekdayMultipleOf),
+  "screenTimeWeekend": zod.number().min(createChildBodyScreenTimeWeekendMin).max(createChildBodyScreenTimeWeekendMax).multipleOf(createChildBodyScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean()
 })
 
@@ -52,18 +84,39 @@ export const CreateChildBody = zod.object({
 /**
  * @summary Get a child profile by ID
  */
+export const getChildPathIdMultipleOf = 1;
+
+
+
 export const GetChildParams = zod.object({
-  "id": zod.coerce.number()
+  "id": zod.coerce.number().min(1).multipleOf(getChildPathIdMultipleOf)
 })
 
+export const getChildResponseIdMultipleOf = 1;
+
+
+export const getChildResponseAgeMax = 17;
+export const getChildResponseAgeMultipleOf = 1;
+
+
+export const getChildResponseScreenTimeWeekdayMin = 0;
+export const getChildResponseScreenTimeWeekdayMax = 1440;
+export const getChildResponseScreenTimeWeekdayMultipleOf = 1;
+
+export const getChildResponseScreenTimeWeekendMin = 0;
+export const getChildResponseScreenTimeWeekendMax = 1440;
+export const getChildResponseScreenTimeWeekendMultipleOf = 1;
+
+
+
 export const GetChildResponse = zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "age": zod.number(),
-  "interests": zod.array(zod.string()),
-  "deviceName": zod.string(),
-  "screenTimeWeekday": zod.number(),
-  "screenTimeWeekend": zod.number(),
+  "id": zod.number().multipleOf(getChildResponseIdMultipleOf),
+  "name": zod.string().min(1),
+  "age": zod.number().min(1).max(getChildResponseAgeMax).multipleOf(getChildResponseAgeMultipleOf),
+  "interests": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "deviceName": zod.string().min(1),
+  "screenTimeWeekday": zod.number().min(getChildResponseScreenTimeWeekdayMin).max(getChildResponseScreenTimeWeekdayMax).multipleOf(getChildResponseScreenTimeWeekdayMultipleOf),
+  "screenTimeWeekend": zod.number().min(getChildResponseScreenTimeWeekendMin).max(getChildResponseScreenTimeWeekendMax).multipleOf(getChildResponseScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
@@ -73,43 +126,67 @@ export const GetChildResponse = zod.object({
 /**
  * @summary Update a child profile
  */
+export const updateChildPathIdMultipleOf = 1;
+
+
+
 export const UpdateChildParams = zod.object({
-  "id": zod.coerce.number()
+  "id": zod.coerce.number().min(1).multipleOf(updateChildPathIdMultipleOf)
 })
 
+
+export const updateChildBodyAgeMax = 17;
+export const updateChildBodyAgeMultipleOf = 1;
+
+
+export const updateChildBodyScreenTimeWeekdayMin = 0;
+export const updateChildBodyScreenTimeWeekdayMax = 1440;
+export const updateChildBodyScreenTimeWeekdayMultipleOf = 1;
+
+export const updateChildBodyScreenTimeWeekendMin = 0;
+export const updateChildBodyScreenTimeWeekendMax = 1440;
+export const updateChildBodyScreenTimeWeekendMultipleOf = 1;
+
+
+
 export const UpdateChildBody = zod.object({
-  "name": zod.string(),
-  "age": zod.number(),
-  "interests": zod.array(zod.string()),
-  "deviceName": zod.string(),
-  "screenTimeWeekday": zod.number(),
-  "screenTimeWeekend": zod.number(),
+  "name": zod.string().min(1),
+  "age": zod.number().min(1).max(updateChildBodyAgeMax).multipleOf(updateChildBodyAgeMultipleOf),
+  "interests": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "deviceName": zod.string().min(1),
+  "screenTimeWeekday": zod.number().min(updateChildBodyScreenTimeWeekdayMin).max(updateChildBodyScreenTimeWeekdayMax).multipleOf(updateChildBodyScreenTimeWeekdayMultipleOf),
+  "screenTimeWeekend": zod.number().min(updateChildBodyScreenTimeWeekendMin).max(updateChildBodyScreenTimeWeekendMax).multipleOf(updateChildBodyScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean()
 })
 
+export const updateChildResponseIdMultipleOf = 1;
+
+
+export const updateChildResponseAgeMax = 17;
+export const updateChildResponseAgeMultipleOf = 1;
+
+
+export const updateChildResponseScreenTimeWeekdayMin = 0;
+export const updateChildResponseScreenTimeWeekdayMax = 1440;
+export const updateChildResponseScreenTimeWeekdayMultipleOf = 1;
+
+export const updateChildResponseScreenTimeWeekendMin = 0;
+export const updateChildResponseScreenTimeWeekendMax = 1440;
+export const updateChildResponseScreenTimeWeekendMultipleOf = 1;
+
+
+
 export const UpdateChildResponse = zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "age": zod.number(),
-  "interests": zod.array(zod.string()),
-  "deviceName": zod.string(),
-  "screenTimeWeekday": zod.number(),
-  "screenTimeWeekend": zod.number(),
+  "id": zod.number().multipleOf(updateChildResponseIdMultipleOf),
+  "name": zod.string().min(1),
+  "age": zod.number().min(1).max(updateChildResponseAgeMax).multipleOf(updateChildResponseAgeMultipleOf),
+  "interests": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "deviceName": zod.string().min(1),
+  "screenTimeWeekday": zod.number().min(updateChildResponseScreenTimeWeekdayMin).max(updateChildResponseScreenTimeWeekdayMax).multipleOf(updateChildResponseScreenTimeWeekdayMultipleOf),
+  "screenTimeWeekend": zod.number().min(updateChildResponseScreenTimeWeekendMin).max(updateChildResponseScreenTimeWeekendMax).multipleOf(updateChildResponseScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
-})
-
-
-/**
- * @summary Delete a child profile
- */
-export const DeleteChildParams = zod.object({
-  "id": zod.coerce.number()
-})
-
-export const DeleteChildResponse = zod.object({
-  "success": zod.boolean()
 })
 
 
@@ -118,23 +195,36 @@ export const DeleteChildResponse = zod.object({
  */
 export const ListAppsQueryParams = zod.object({
   "includeRemoved": zod.coerce.boolean().optional(),
-  "category": zod.coerce.string().optional(),
-  "interestTag": zod.coerce.string().optional()
+  "category": zod.enum(['Games', 'Education', 'Creative', 'Music', 'Reading']).optional(),
+  "interestTag": zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning']).optional()
 })
 
+export const listAppsResponseIdMultipleOf = 1;
+
+
+export const listAppsResponseAgeMinMin = 0;
+export const listAppsResponseAgeMinMax = 17;
+export const listAppsResponseAgeMinMultipleOf = 1;
+
+export const listAppsResponseAgeMaxMin = 0;
+export const listAppsResponseAgeMaxMax = 17;
+export const listAppsResponseAgeMaxMultipleOf = 1;
+
+
+
 export const ListAppsResponseItem = zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "appStoreUrl": zod.string(),
-  "category": zod.string(),
-  "ageMin": zod.number(),
-  "ageMax": zod.number(),
-  "interestTags": zod.array(zod.string()),
-  "costModel": zod.string(),
-  "adStatus": zod.string(),
+  "id": zod.number().multipleOf(listAppsResponseIdMultipleOf),
+  "name": zod.string().min(1),
+  "appStoreUrl": zod.string().url(),
+  "category": zod.enum(['Games', 'Education', 'Creative', 'Music', 'Reading']),
+  "ageMin": zod.number().min(listAppsResponseAgeMinMin).max(listAppsResponseAgeMinMax).multipleOf(listAppsResponseAgeMinMultipleOf),
+  "ageMax": zod.number().min(listAppsResponseAgeMaxMin).max(listAppsResponseAgeMaxMax).multipleOf(listAppsResponseAgeMaxMultipleOf),
+  "interestTags": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "costModel": zod.enum(['Free', 'One-time purchase', 'Subscription']),
+  "adStatus": zod.enum(['No Ads', 'Minimal', 'Has Ads']),
   "notes": zod.string(),
   "lastVerified": zod.string(),
-  "status": zod.string(),
+  "status": zod.enum(['Active', 'Removed']).describe('Catalog soft delete. Removed apps keep their record and notes.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -144,40 +234,68 @@ export const ListAppsResponse = zod.array(ListAppsResponseItem)
 /**
  * @summary Add an app to the catalog
  */
+
+export const createAppBodyAgeMinMin = 0;
+export const createAppBodyAgeMinMax = 17;
+export const createAppBodyAgeMinMultipleOf = 1;
+
+export const createAppBodyAgeMaxMin = 0;
+export const createAppBodyAgeMaxMax = 17;
+export const createAppBodyAgeMaxMultipleOf = 1;
+
+
+
 export const CreateAppBody = zod.object({
-  "name": zod.string(),
-  "appStoreUrl": zod.string(),
-  "category": zod.string(),
-  "ageMin": zod.number(),
-  "ageMax": zod.number(),
-  "interestTags": zod.array(zod.string()),
-  "costModel": zod.string(),
-  "adStatus": zod.string(),
-  "notes": zod.string().optional(),
-  "status": zod.string().optional()
+  "name": zod.string().min(1),
+  "appStoreUrl": zod.string().url(),
+  "category": zod.enum(['Games', 'Education', 'Creative', 'Music', 'Reading']),
+  "ageMin": zod.number().min(createAppBodyAgeMinMin).max(createAppBodyAgeMinMax).multipleOf(createAppBodyAgeMinMultipleOf),
+  "ageMax": zod.number().min(createAppBodyAgeMaxMin).max(createAppBodyAgeMaxMax).multipleOf(createAppBodyAgeMaxMultipleOf),
+  "interestTags": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "costModel": zod.enum(['Free', 'One-time purchase', 'Subscription']),
+  "adStatus": zod.enum(['No Ads', 'Minimal', 'Has Ads']),
+  "notes": zod.string(),
+  "status": zod.enum(['Active', 'Removed']).describe('Catalog soft delete. Removed apps keep their record and notes.')
 })
 
 
 /**
  * @summary Get an app by ID
  */
+export const getAppPathIdMultipleOf = 1;
+
+
+
 export const GetAppParams = zod.object({
-  "id": zod.coerce.number()
+  "id": zod.coerce.number().min(1).multipleOf(getAppPathIdMultipleOf)
 })
 
+export const getAppResponseIdMultipleOf = 1;
+
+
+export const getAppResponseAgeMinMin = 0;
+export const getAppResponseAgeMinMax = 17;
+export const getAppResponseAgeMinMultipleOf = 1;
+
+export const getAppResponseAgeMaxMin = 0;
+export const getAppResponseAgeMaxMax = 17;
+export const getAppResponseAgeMaxMultipleOf = 1;
+
+
+
 export const GetAppResponse = zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "appStoreUrl": zod.string(),
-  "category": zod.string(),
-  "ageMin": zod.number(),
-  "ageMax": zod.number(),
-  "interestTags": zod.array(zod.string()),
-  "costModel": zod.string(),
-  "adStatus": zod.string(),
+  "id": zod.number().multipleOf(getAppResponseIdMultipleOf),
+  "name": zod.string().min(1),
+  "appStoreUrl": zod.string().url(),
+  "category": zod.enum(['Games', 'Education', 'Creative', 'Music', 'Reading']),
+  "ageMin": zod.number().min(getAppResponseAgeMinMin).max(getAppResponseAgeMinMax).multipleOf(getAppResponseAgeMinMultipleOf),
+  "ageMax": zod.number().min(getAppResponseAgeMaxMin).max(getAppResponseAgeMaxMax).multipleOf(getAppResponseAgeMaxMultipleOf),
+  "interestTags": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "costModel": zod.enum(['Free', 'One-time purchase', 'Subscription']),
+  "adStatus": zod.enum(['No Ads', 'Minimal', 'Has Ads']),
   "notes": zod.string(),
   "lastVerified": zod.string(),
-  "status": zod.string(),
+  "status": zod.enum(['Active', 'Removed']).describe('Catalog soft delete. Removed apps keep their record and notes.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -186,70 +304,100 @@ export const GetAppResponse = zod.object({
 /**
  * @summary Update an app
  */
+export const updateAppPathIdMultipleOf = 1;
+
+
+
 export const UpdateAppParams = zod.object({
-  "id": zod.coerce.number()
+  "id": zod.coerce.number().min(1).multipleOf(updateAppPathIdMultipleOf)
 })
+
+
+export const updateAppBodyAgeMinMin = 0;
+export const updateAppBodyAgeMinMax = 17;
+export const updateAppBodyAgeMinMultipleOf = 1;
+
+export const updateAppBodyAgeMaxMin = 0;
+export const updateAppBodyAgeMaxMax = 17;
+export const updateAppBodyAgeMaxMultipleOf = 1;
+
+
 
 export const UpdateAppBody = zod.object({
-  "name": zod.string(),
-  "appStoreUrl": zod.string(),
-  "category": zod.string(),
-  "ageMin": zod.number(),
-  "ageMax": zod.number(),
-  "interestTags": zod.array(zod.string()),
-  "costModel": zod.string(),
-  "adStatus": zod.string(),
-  "notes": zod.string().optional(),
-  "status": zod.string().optional()
+  "name": zod.string().min(1),
+  "appStoreUrl": zod.string().url(),
+  "category": zod.enum(['Games', 'Education', 'Creative', 'Music', 'Reading']),
+  "ageMin": zod.number().min(updateAppBodyAgeMinMin).max(updateAppBodyAgeMinMax).multipleOf(updateAppBodyAgeMinMultipleOf),
+  "ageMax": zod.number().min(updateAppBodyAgeMaxMin).max(updateAppBodyAgeMaxMax).multipleOf(updateAppBodyAgeMaxMultipleOf),
+  "interestTags": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "costModel": zod.enum(['Free', 'One-time purchase', 'Subscription']),
+  "adStatus": zod.enum(['No Ads', 'Minimal', 'Has Ads']),
+  "notes": zod.string(),
+  "status": zod.enum(['Active', 'Removed']).describe('Catalog soft delete. Removed apps keep their record and notes.')
 })
 
+export const updateAppResponseIdMultipleOf = 1;
+
+
+export const updateAppResponseAgeMinMin = 0;
+export const updateAppResponseAgeMinMax = 17;
+export const updateAppResponseAgeMinMultipleOf = 1;
+
+export const updateAppResponseAgeMaxMin = 0;
+export const updateAppResponseAgeMaxMax = 17;
+export const updateAppResponseAgeMaxMultipleOf = 1;
+
+
+
 export const UpdateAppResponse = zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "appStoreUrl": zod.string(),
-  "category": zod.string(),
-  "ageMin": zod.number(),
-  "ageMax": zod.number(),
-  "interestTags": zod.array(zod.string()),
-  "costModel": zod.string(),
-  "adStatus": zod.string(),
+  "id": zod.number().multipleOf(updateAppResponseIdMultipleOf),
+  "name": zod.string().min(1),
+  "appStoreUrl": zod.string().url(),
+  "category": zod.enum(['Games', 'Education', 'Creative', 'Music', 'Reading']),
+  "ageMin": zod.number().min(updateAppResponseAgeMinMin).max(updateAppResponseAgeMinMax).multipleOf(updateAppResponseAgeMinMultipleOf),
+  "ageMax": zod.number().min(updateAppResponseAgeMaxMin).max(updateAppResponseAgeMaxMax).multipleOf(updateAppResponseAgeMaxMultipleOf),
+  "interestTags": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "costModel": zod.enum(['Free', 'One-time purchase', 'Subscription']),
+  "adStatus": zod.enum(['No Ads', 'Minimal', 'Has Ads']),
   "notes": zod.string(),
   "lastVerified": zod.string(),
-  "status": zod.string(),
+  "status": zod.enum(['Active', 'Removed']).describe('Catalog soft delete. Removed apps keep their record and notes.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
 
 
 /**
- * @summary Delete an app from the catalog
- */
-export const DeleteAppParams = zod.object({
-  "id": zod.coerce.number()
-})
-
-export const DeleteAppResponse = zod.object({
-  "success": zod.boolean()
-})
-
-
-/**
  * @summary Upsert per-child app status
  */
+export const updateChildAppStatusPathChildIdMultipleOf = 1;
+
+export const updateChildAppStatusPathAppIdMultipleOf = 1;
+
+
+
 export const UpdateChildAppStatusParams = zod.object({
-  "childId": zod.coerce.number(),
-  "appId": zod.coerce.number()
+  "childId": zod.coerce.number().min(1).multipleOf(updateChildAppStatusPathChildIdMultipleOf),
+  "appId": zod.coerce.number().min(1).multipleOf(updateChildAppStatusPathAppIdMultipleOf)
 })
 
 export const UpdateChildAppStatusBody = zod.object({
-  "status": zod.string()
+  "status": zod.enum(['Not Installed', 'Pushed', 'Installed', 'Removed']).describe('Per-child install state. Tracked by the parent; Apogee does not install anything.')
 })
 
+export const updateChildAppStatusResponseIdMultipleOf = 1;
+
+export const updateChildAppStatusResponseChildIdMultipleOf = 1;
+
+export const updateChildAppStatusResponseAppIdMultipleOf = 1;
+
+
+
 export const UpdateChildAppStatusResponse = zod.object({
-  "id": zod.number(),
-  "childId": zod.number(),
-  "appId": zod.number(),
-  "status": zod.string(),
+  "id": zod.number().multipleOf(updateChildAppStatusResponseIdMultipleOf),
+  "childId": zod.number().multipleOf(updateChildAppStatusResponseChildIdMultipleOf),
+  "appId": zod.number().multipleOf(updateChildAppStatusResponseAppIdMultipleOf),
+  "status": zod.enum(['Not Installed', 'Pushed', 'Installed', 'Removed']).describe('Per-child install state. Tracked by the parent; Apogee does not install anything.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -258,40 +406,74 @@ export const UpdateChildAppStatusResponse = zod.object({
 /**
  * @summary Export all data as JSON
  */
+export const exportDataResponseChildrenItemIdMultipleOf = 1;
+
+
+export const exportDataResponseChildrenItemAgeMax = 17;
+export const exportDataResponseChildrenItemAgeMultipleOf = 1;
+
+
+export const exportDataResponseChildrenItemScreenTimeWeekdayMin = 0;
+export const exportDataResponseChildrenItemScreenTimeWeekdayMax = 1440;
+export const exportDataResponseChildrenItemScreenTimeWeekdayMultipleOf = 1;
+
+export const exportDataResponseChildrenItemScreenTimeWeekendMin = 0;
+export const exportDataResponseChildrenItemScreenTimeWeekendMax = 1440;
+export const exportDataResponseChildrenItemScreenTimeWeekendMultipleOf = 1;
+
+export const exportDataResponseAppsItemIdMultipleOf = 1;
+
+
+export const exportDataResponseAppsItemAgeMinMin = 0;
+export const exportDataResponseAppsItemAgeMinMax = 17;
+export const exportDataResponseAppsItemAgeMinMultipleOf = 1;
+
+export const exportDataResponseAppsItemAgeMaxMin = 0;
+export const exportDataResponseAppsItemAgeMaxMax = 17;
+export const exportDataResponseAppsItemAgeMaxMultipleOf = 1;
+
+export const exportDataResponseChildAppStatusesItemIdMultipleOf = 1;
+
+export const exportDataResponseChildAppStatusesItemChildIdMultipleOf = 1;
+
+export const exportDataResponseChildAppStatusesItemAppIdMultipleOf = 1;
+
+
+
 export const ExportDataResponse = zod.object({
   "children": zod.array(zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "age": zod.number(),
-  "interests": zod.array(zod.string()),
-  "deviceName": zod.string(),
-  "screenTimeWeekday": zod.number(),
-  "screenTimeWeekend": zod.number(),
+  "id": zod.number().multipleOf(exportDataResponseChildrenItemIdMultipleOf),
+  "name": zod.string().min(1),
+  "age": zod.number().min(1).max(exportDataResponseChildrenItemAgeMax).multipleOf(exportDataResponseChildrenItemAgeMultipleOf),
+  "interests": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "deviceName": zod.string().min(1),
+  "screenTimeWeekday": zod.number().min(exportDataResponseChildrenItemScreenTimeWeekdayMin).max(exportDataResponseChildrenItemScreenTimeWeekdayMax).multipleOf(exportDataResponseChildrenItemScreenTimeWeekdayMultipleOf),
+  "screenTimeWeekend": zod.number().min(exportDataResponseChildrenItemScreenTimeWeekendMin).max(exportDataResponseChildrenItemScreenTimeWeekendMax).multipleOf(exportDataResponseChildrenItemScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })),
   "apps": zod.array(zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "appStoreUrl": zod.string(),
-  "category": zod.string(),
-  "ageMin": zod.number(),
-  "ageMax": zod.number(),
-  "interestTags": zod.array(zod.string()),
-  "costModel": zod.string(),
-  "adStatus": zod.string(),
+  "id": zod.number().multipleOf(exportDataResponseAppsItemIdMultipleOf),
+  "name": zod.string().min(1),
+  "appStoreUrl": zod.string().url(),
+  "category": zod.enum(['Games', 'Education', 'Creative', 'Music', 'Reading']),
+  "ageMin": zod.number().min(exportDataResponseAppsItemAgeMinMin).max(exportDataResponseAppsItemAgeMinMax).multipleOf(exportDataResponseAppsItemAgeMinMultipleOf),
+  "ageMax": zod.number().min(exportDataResponseAppsItemAgeMaxMin).max(exportDataResponseAppsItemAgeMaxMax).multipleOf(exportDataResponseAppsItemAgeMaxMultipleOf),
+  "interestTags": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "costModel": zod.enum(['Free', 'One-time purchase', 'Subscription']),
+  "adStatus": zod.enum(['No Ads', 'Minimal', 'Has Ads']),
   "notes": zod.string(),
   "lastVerified": zod.string(),
-  "status": zod.string(),
+  "status": zod.enum(['Active', 'Removed']).describe('Catalog soft delete. Removed apps keep their record and notes.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })),
   "childAppStatuses": zod.array(zod.object({
-  "id": zod.number(),
-  "childId": zod.number(),
-  "appId": zod.number(),
-  "status": zod.string(),
+  "id": zod.number().multipleOf(exportDataResponseChildAppStatusesItemIdMultipleOf),
+  "childId": zod.number().multipleOf(exportDataResponseChildAppStatusesItemChildIdMultipleOf),
+  "appId": zod.number().multipleOf(exportDataResponseChildAppStatusesItemAppIdMultipleOf),
+  "status": zod.enum(['Not Installed', 'Pushed', 'Installed', 'Removed']).describe('Per-child install state. Tracked by the parent; Apogee does not install anything.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 }))
@@ -301,37 +483,65 @@ export const ExportDataResponse = zod.object({
 /**
  * @summary Get per-child matched apps with statuses
  */
+export const getDashboardResponseChildIdMultipleOf = 1;
+
+
+export const getDashboardResponseChildAgeMax = 17;
+export const getDashboardResponseChildAgeMultipleOf = 1;
+
+
+export const getDashboardResponseChildScreenTimeWeekdayMin = 0;
+export const getDashboardResponseChildScreenTimeWeekdayMax = 1440;
+export const getDashboardResponseChildScreenTimeWeekdayMultipleOf = 1;
+
+export const getDashboardResponseChildScreenTimeWeekendMin = 0;
+export const getDashboardResponseChildScreenTimeWeekendMax = 1440;
+export const getDashboardResponseChildScreenTimeWeekendMultipleOf = 1;
+
+export const getDashboardResponseMatchedAppsItemAppIdMultipleOf = 1;
+
+
+export const getDashboardResponseMatchedAppsItemAppAgeMinMin = 0;
+export const getDashboardResponseMatchedAppsItemAppAgeMinMax = 17;
+export const getDashboardResponseMatchedAppsItemAppAgeMinMultipleOf = 1;
+
+export const getDashboardResponseMatchedAppsItemAppAgeMaxMin = 0;
+export const getDashboardResponseMatchedAppsItemAppAgeMaxMax = 17;
+export const getDashboardResponseMatchedAppsItemAppAgeMaxMultipleOf = 1;
+
+
+
 export const GetDashboardResponseItem = zod.object({
   "child": zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "age": zod.number(),
-  "interests": zod.array(zod.string()),
-  "deviceName": zod.string(),
-  "screenTimeWeekday": zod.number(),
-  "screenTimeWeekend": zod.number(),
+  "id": zod.number().multipleOf(getDashboardResponseChildIdMultipleOf),
+  "name": zod.string().min(1),
+  "age": zod.number().min(1).max(getDashboardResponseChildAgeMax).multipleOf(getDashboardResponseChildAgeMultipleOf),
+  "interests": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "deviceName": zod.string().min(1),
+  "screenTimeWeekday": zod.number().min(getDashboardResponseChildScreenTimeWeekdayMin).max(getDashboardResponseChildScreenTimeWeekdayMax).multipleOf(getDashboardResponseChildScreenTimeWeekdayMultipleOf),
+  "screenTimeWeekend": zod.number().min(getDashboardResponseChildScreenTimeWeekendMin).max(getDashboardResponseChildScreenTimeWeekendMax).multipleOf(getDashboardResponseChildScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 }),
   "matchedApps": zod.array(zod.object({
   "app": zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "appStoreUrl": zod.string(),
-  "category": zod.string(),
-  "ageMin": zod.number(),
-  "ageMax": zod.number(),
-  "interestTags": zod.array(zod.string()),
-  "costModel": zod.string(),
-  "adStatus": zod.string(),
+  "id": zod.number().multipleOf(getDashboardResponseMatchedAppsItemAppIdMultipleOf),
+  "name": zod.string().min(1),
+  "appStoreUrl": zod.string().url(),
+  "category": zod.enum(['Games', 'Education', 'Creative', 'Music', 'Reading']),
+  "ageMin": zod.number().min(getDashboardResponseMatchedAppsItemAppAgeMinMin).max(getDashboardResponseMatchedAppsItemAppAgeMinMax).multipleOf(getDashboardResponseMatchedAppsItemAppAgeMinMultipleOf),
+  "ageMax": zod.number().min(getDashboardResponseMatchedAppsItemAppAgeMaxMin).max(getDashboardResponseMatchedAppsItemAppAgeMaxMax).multipleOf(getDashboardResponseMatchedAppsItemAppAgeMaxMultipleOf),
+  "interestTags": zod.array(zod.enum(['Engineering', 'Baking/Food', 'Music', 'Drawing', 'Reading', 'Math', 'Science', 'Gaming', 'Language Learning'])),
+  "costModel": zod.enum(['Free', 'One-time purchase', 'Subscription']),
+  "adStatus": zod.enum(['No Ads', 'Minimal', 'Has Ads']),
   "notes": zod.string(),
   "lastVerified": zod.string(),
-  "status": zod.string(),
+  "status": zod.enum(['Active', 'Removed']).describe('Catalog soft delete. Removed apps keep their record and notes.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 }),
-  "childStatus": zod.string()
+  "childStatus": zod.enum(['Not Installed', 'Pushed', 'Installed', 'Removed']).describe('Per-child install state. Tracked by the parent; Apogee does not install anything.')
 }))
 })
 export const GetDashboardResponse = zod.array(GetDashboardResponseItem)

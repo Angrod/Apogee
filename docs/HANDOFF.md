@@ -151,7 +151,7 @@ Set its catalog status to **Removed** and save. This retains the record and note
 
 To restore: enable *show removed*, open its edit page, change the status to Active, and save.
 
-> **Implementation gap:** the backend also exposes `DELETE /api/apps/:id`, which attempts a permanent database deletion. This does not implement the intended soft-delete policy. Do not use it for normal removal. It may also fail when related child-status rows exist, because those relationships have foreign keys.
+There is no delete endpoint for apps or children. Removal is always the soft-delete status above.
 
 ## 6. How matching works
 
@@ -329,19 +329,15 @@ The DB enum also retains legacy `Blocked` and `Limited` values. The UI exposes o
 | `POST /api/children`                       | Create profile                                  |
 | `GET /api/children/:id`                    | Read profile                                    |
 | `PUT /api/children/:id`                    | Update profile                                  |
-| `DELETE /api/children/:id`                 | Attempt permanent profile deletion              |
 | `GET /api/apps`                            | List catalog (`includeRemoved=true`, `category`, `interestTag`) |
 | `POST /api/apps`                           | Create app                                      |
 | `GET /api/apps/:id`                        | Read app                                        |
 | `PUT /api/apps/:id`                        | Update app                                      |
-| `DELETE /api/apps/:id`                     | Permanent delete — **not** the intended soft-delete flow |
 | `GET /api/dashboard`                       | Match apps and initialize missing status rows   |
-| `PUT /api/child-app-status/:childId/:appId`| Set status for one pair, body `{ "status": "Installed" }` |
+| `PUT /api/child-app-status/:childId/:appId`| Upsert status for one pair, body `{ "status": "Installed" }`; 404 if the child or app doesn't exist |
 | `GET /api/export`                          | Export all three collections                    |
 
-Update handlers replace fields and default some omitted values — they are not safe partial updates. Send a complete payload.
-
-Generated Zod schemas exist, but route handlers largely use `req.body` directly. Frontend validation does not protect the API from invalid direct requests.
+Every route validates its params, query, and body with the Zod schemas generated from `openapi.yaml` (enums, ranges, integers, URL format). `PUT` is a full replacement: every field is required, so nothing is silently reset. Errors are JSON: `400 { error, details[] }` for invalid input, `404 { error }` for a missing record or route, and `500 { error: "Internal server error" }` (details are only logged).
 
 ## 14. Running and building
 

@@ -6,8 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CatalogApp } from './catalogApp';
+import type { InstallStatus } from './installStatus';
 
 export interface DashboardAppEntry {
   app: CatalogApp;
-  childStatus: string;
+  childStatus: InstallStatus;
 }

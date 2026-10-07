@@ -5,78 +5,188 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface Error {
+  error: string;
+  details?: string[];
+}
+
+/**
+ * @minimum 1
+ */
+export type Id = number;
+
+export type InterestTag = typeof InterestTag[keyof typeof InterestTag];
+
+
+export const InterestTag = {
+  Engineering: 'Engineering',
+  'Baking/Food': 'Baking/Food',
+  Music: 'Music',
+  Drawing: 'Drawing',
+  Reading: 'Reading',
+  Math: 'Math',
+  Science: 'Science',
+  Gaming: 'Gaming',
+  Language_Learning: 'Language Learning',
+} as const;
+
+export type Category = typeof Category[keyof typeof Category];
+
+
+export const Category = {
+  Games: 'Games',
+  Education: 'Education',
+  Creative: 'Creative',
+  Music: 'Music',
+  Reading: 'Reading',
+} as const;
+
+export type CostModel = typeof CostModel[keyof typeof CostModel];
+
+
+export const CostModel = {
+  Free: 'Free',
+  'One-time_purchase': 'One-time purchase',
+  Subscription: 'Subscription',
+} as const;
+
+export type AdStatus = typeof AdStatus[keyof typeof AdStatus];
+
+
+export const AdStatus = {
+  No_Ads: 'No Ads',
+  Minimal: 'Minimal',
+  Has_Ads: 'Has Ads',
+} as const;
+
+/**
+ * Catalog soft delete. Removed apps keep their record and notes.
+ */
+export type CatalogStatus = typeof CatalogStatus[keyof typeof CatalogStatus];
+
+
+export const CatalogStatus = {
+  Active: 'Active',
+  Removed: 'Removed',
+} as const;
+
+/**
+ * Per-child install state. Tracked by the parent; Apogee does not install anything.
+ */
+export type InstallStatus = typeof InstallStatus[keyof typeof InstallStatus];
+
+
+export const InstallStatus = {
+  Not_Installed: 'Not Installed',
+  Pushed: 'Pushed',
+  Installed: 'Installed',
+  Removed: 'Removed',
+} as const;
+
+/**
+ * @minimum 0
+ * @maximum 1440
+ */
+export type ScreenTimeMinutes = number;
+
 export interface HealthStatus {
   status: string;
 }
 
-export interface DeleteResult {
-  success: boolean;
-}
-
 export interface Child {
   id: number;
+  /** @minLength 1 */
   name: string;
+  /**
+     * @minimum 1
+     * @maximum 17
+     */
   age: number;
-  interests: string[];
+  interests: InterestTag[];
+  /** @minLength 1 */
   deviceName: string;
-  screenTimeWeekday: number;
-  screenTimeWeekend: number;
+  screenTimeWeekday: ScreenTimeMinutes;
+  screenTimeWeekend: ScreenTimeMinutes;
   appleArcade: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ChildInput {
+  /** @minLength 1 */
   name: string;
+  /**
+     * @minimum 1
+     * @maximum 17
+     */
   age: number;
-  interests: string[];
+  interests: InterestTag[];
+  /** @minLength 1 */
   deviceName: string;
-  screenTimeWeekday: number;
-  screenTimeWeekend: number;
+  screenTimeWeekday: ScreenTimeMinutes;
+  screenTimeWeekend: ScreenTimeMinutes;
   appleArcade: boolean;
 }
 
 export interface CatalogApp {
   id: number;
+  /** @minLength 1 */
   name: string;
   appStoreUrl: string;
-  category: string;
+  category: Category;
+  /**
+     * @minimum 0
+     * @maximum 17
+     */
   ageMin: number;
+  /**
+     * @minimum 0
+     * @maximum 17
+     */
   ageMax: number;
-  interestTags: string[];
-  costModel: string;
-  adStatus: string;
+  interestTags: InterestTag[];
+  costModel: CostModel;
+  adStatus: AdStatus;
   notes: string;
   lastVerified: string;
-  status: string;
+  status: CatalogStatus;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface AppInput {
+  /** @minLength 1 */
   name: string;
   appStoreUrl: string;
-  category: string;
+  category: Category;
+  /**
+     * @minimum 0
+     * @maximum 17
+     */
   ageMin: number;
+  /**
+     * @minimum 0
+     * @maximum 17
+     */
   ageMax: number;
-  interestTags: string[];
-  costModel: string;
-  adStatus: string;
-  notes?: string;
-  status?: string;
+  interestTags: InterestTag[];
+  costModel: CostModel;
+  adStatus: AdStatus;
+  notes: string;
+  status: CatalogStatus;
 }
 
 export interface ChildAppStatusRecord {
   id: number;
   childId: number;
   appId: number;
-  status: string;
+  status: InstallStatus;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ChildAppStatusInput {
-  status: string;
+  status: InstallStatus;
 }
 
 export interface ExportData {
@@ -87,7 +197,7 @@ export interface ExportData {
 
 export interface DashboardAppEntry {
   app: CatalogApp;
-  childStatus: string;
+  childStatus: InstallStatus;
 }
 
 export interface DashboardEntry {
@@ -95,9 +205,19 @@ export interface DashboardEntry {
   matchedApps: DashboardAppEntry[];
 }
 
+/**
+ * The request was invalid
+ */
+export type BadRequestResponse = Error;
+
+/**
+ * Not found
+ */
+export type NotFoundResponse = Error;
+
 export type ListAppsParams = {
 includeRemoved?: boolean;
-category?: string;
-interestTag?: string;
+category?: Category;
+interestTag?: InterestTag;
 };
 

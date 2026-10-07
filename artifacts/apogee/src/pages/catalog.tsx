@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { useListApps, getListAppsQueryKey } from "@workspace/api-client-react";
-import type { CatalogApp } from "@workspace/api-client-react";
+import type { CatalogApp, InterestTag } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -145,7 +145,7 @@ export default function Catalog() {
     return allApps.filter((app) => {
       if (!showRemoved && app.status === "Removed") return false;
       if (categoryFilter !== "All" && app.category !== categoryFilter) return false;
-      if (tagFilter !== "All" && !app.interestTags.includes(tagFilter)) return false;
+      if (tagFilter !== "All" && !app.interestTags.includes(tagFilter as InterestTag)) return false;
       return true;
     });
   }, [allApps, showRemoved, categoryFilter, tagFilter]);

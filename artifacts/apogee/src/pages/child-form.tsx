@@ -44,7 +44,7 @@ const schema = z.object({
     .min(1, "Age must be at least 1")
     .max(17, "Age must be 17 or under"),
   deviceName: z.string().min(1, "Device name is required"),
-  interests: z.array(z.string()).default([]),
+  interests: z.array(z.enum(INTEREST_TAGS)).default([]),
   screenTimeWeekday: z
     .number({ invalid_type_error: "Must be a number" })
     .min(0, "Cannot be negative")
@@ -57,15 +57,16 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
+type InterestTag = (typeof INTEREST_TAGS)[number];
 
 function InterestToggle({
   tag,
   selected,
   onToggle,
 }: {
-  tag: string;
+  tag: InterestTag;
   selected: boolean;
-  onToggle: (tag: string) => void;
+  onToggle: (tag: InterestTag) => void;
 }) {
   return (
     <button
@@ -178,7 +179,7 @@ function ChildFormContent({ childId }: { childId?: number }) {
         name: existingChild.name,
         age: existingChild.age,
         deviceName: existingChild.deviceName,
-        interests: (existingChild.interests as string[]) ?? [],
+        interests: existingChild.interests,
         screenTimeWeekday: minutesToHours(existingChild.screenTimeWeekday),
         screenTimeWeekend: minutesToHours(existingChild.screenTimeWeekend),
         appleArcade: existingChild.appleArcade,
@@ -189,7 +190,7 @@ function ChildFormContent({ childId }: { childId?: number }) {
   const interests = watch("interests") ?? [];
   const appleArcade = watch("appleArcade");
 
-  function toggleInterest(tag: string) {
+  function toggleInterest(tag: InterestTag) {
     const current = interests;
     if (current.includes(tag)) {
       setValue("interests", current.filter((t) => t !== tag));

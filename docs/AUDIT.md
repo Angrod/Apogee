@@ -36,7 +36,7 @@ The browser calls `/api/...` on the web app's own origin. On Replit, the platfor
 ### ✅ 2.2 Screen-time values drift on every edit
 `child-form.tsx:168` rounds stored minutes to **0.1 hour** for display, while the input step is **0.25 hour** (line 260). For example, 1.25 h is stored as 75 min, displayed as 1.3, and saved back as 78 min. **Fix:** don't round to 0.1. Show minutes directly or keep exact decimals.
 
-### 🟠 2.3 The API trusts every request body
+### ✅ 2.3 The API trusts every request body
 None of the routes validate input. The generated Zod schemas (`@workspace/api-zod`) are only used by `/healthz`. Consequences:
 - An invalid `status` (e.g. `"Banana"`) fails the Postgres enum and returns an **HTML 500 with a stack trace** (Express 5's default handler in non-production).
 - Non-numeric IDs (`/apps/abc`) turn into `NaN` and also 500.
@@ -45,10 +45,10 @@ None of the routes validate input. The generated Zod schemas (`@workspace/api-zo
 
 **Fix:** parse `req.body`/`req.params` with the generated schemas, add `enum`s to `openapi.yaml`, and add a JSON error handler.
 
-### 🟠 2.4 The DELETE endpoints break the data rules
+### ✅ 2.4 The DELETE endpoints break the data rules
 `routes/apps.ts:79` hard-deletes catalog apps, which goes against the soft-delete rule. `routes/children.ts:63` hard-deletes children. Both also **fail with a 500** once status rows exist, because the foreign keys have no `ON DELETE` behavior. The UI never calls either. **Fix:** remove both, or replace them with archive and cascade behavior.
 
-### 🟠 2.5 Status updates aren't atomic
+### ✅ 2.5 Status updates aren't atomic
 `routes/child-app-status.ts:12`: select, then insert or update. Two first writes at the same moment can hit the unique index and 500. It also doesn't check that the child and app exist. **Fix:** a single `insert … onConflictDoUpdate`.
 
 ### ✅ 2.6 The dashboard briefly shows the old status after a change
@@ -151,6 +151,21 @@ Found during testing: React Query pauses retries while the tab is unfocused, and
 - Edit forms now render only after the record loads.
 - 4xx responses are no longer retried (global `retry` in `App.tsx`; `ApiError` is now exported from `@workspace/api-client-react`).
 
+## Step 4 notes (done)
+- `openapi.yaml` now defines enums for interest tags, categories, cost, ads, catalog status, and install status, plus ranges (age 1–17, app ages 0–17, screen time 0–1440 minutes), a URL format, and positive integer IDs.
+- Every route parses its params, query, and body with the generated schemas (`src/lib/http.ts`). PUT requires full bodies. Catalog filtering moved into SQL. `ageMin <= ageMax` is checked on the server.
+- Errors are JSON 400/404/500, and 500s never leak internals.
+- The status write is one `INSERT … ON CONFLICT DO UPDATE`; a missing child or app returns 404.
+- The DELETE endpoints are removed from the spec and the server.
+- Verified with 30 request checks plus a database-outage test against a throwaway Postgres.
+
+Found during this step:
+- 🔴→✅ **A database blip crashed the API.** `pg.Pool` had no `error` listener, so a dropped idle connection killed the process. A listener was added in `lib/db`. The API now returns 500 while the DB is down and recovers on its own.
+- ✅ `includeRemoved=false` would have been read as `true` (`z.coerce.boolean()`); the route reads the raw string instead.
+- ✅ Orval ignores `type: integer`, so integers use `multipleOf: 1` to get enforced.
+- ✅ Removed a Next.js `"use client"` directive from `label.tsx` that caused a build warning.
+- Still open (step 6): the DB columns for category, cost, ads, and status are free text, so only the API enforces the enums. Moving them into DB enums or check constraints needs a reviewed migration.
+
 ## Proposed cleanup order
 
 Each step is a separate, reviewable change.
@@ -158,7 +173,7 @@ Each step is a separate, reviewable change.
 1. ✅ **Make it run locally:** fix the workspace overrides and lockfile (1.1) and add the Vite `/api` proxy (1.2). Without this nothing else can be tested.
 2. ✅ **Remove Replit leftovers and bloat** (§4, §5): mockup sandbox, unused UI and packages, Replit config and plugins, `index.html` placeholders, `noindex`. Pure deletion; verified by typecheck, build, and clicking through.
 3. ✅ **Fix the data-loss and drift bugs** (2.1, 2.2, 2.6, 2.7, 2.8): frontend only.
-4. **Harden the API** (2.3, 2.4, 2.5): enums in the spec, validation with the generated schemas, a JSON error handler, an atomic upsert, removed or replaced DELETEs.
+4. ✅ **Harden the API** (2.3, 2.4, 2.5): enums in the spec, validation with the generated schemas, a JSON error handler, an atomic upsert, removed or replaced DELETEs.
 5. **Consolidate** (§6): shared constants from the spec, one matching function, the `<Link>`/`<Button>` fix, one Zod version.
 6. **Data:** correct the seed entries (§3), and plan the DB fixes (interests type, legacy enum values, constraint vs. index) as a reviewed migration against a backup.
 7. **Tests:** turn HANDOFF §17 into automated checks.

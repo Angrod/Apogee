@@ -5,13 +5,21 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { InterestTag } from './interestTag';
+import type { ScreenTimeMinutes } from './screenTimeMinutes';
 
 export interface ChildInput {
+  /** @minLength 1 */
   name: string;
+  /**
+     * @minimum 1
+     * @maximum 17
+     */
   age: number;
-  interests: string[];
+  interests: InterestTag[];
+  /** @minLength 1 */
   deviceName: string;
-  screenTimeWeekday: number;
-  screenTimeWeekend: number;
+  screenTimeWeekday: ScreenTimeMinutes;
+  screenTimeWeekend: ScreenTimeMinutes;
   appleArcade: boolean;
 }

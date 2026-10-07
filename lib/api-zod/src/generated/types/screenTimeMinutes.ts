@@ -5,8 +5,9 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { InstallStatus } from './installStatus';
 
-export interface ChildAppStatusInput {
-  status: InstallStatus;
-}
+/**
+ * @minimum 0
+ * @maximum 1440
+ */
+export type ScreenTimeMinutes = number;

@@ -21,16 +21,18 @@ import type {
 
 import type {
   AppInput,
+  BadRequestResponse,
   CatalogApp,
   Child,
   ChildAppStatusInput,
   ChildAppStatusRecord,
   ChildInput,
   DashboardEntry,
-  DeleteResult,
   ExportData,
   HealthStatus,
-  ListAppsParams
+  Id,
+  ListAppsParams,
+  NotFoundResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -226,7 +228,7 @@ export const createChild = async (childInput: ChildInput, options?: RequestInit)
 
 
 
-export const getCreateChildMutationOptions = <TError = ErrorType<unknown>,
+export const getCreateChildMutationOptions = <TError = ErrorType<BadRequestResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChild>>, TError,{data: BodyType<ChildInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createChild>>, TError,{data: BodyType<ChildInput>}, TContext> => {
 
@@ -255,12 +257,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CreateChildMutationResult = NonNullable<Awaited<ReturnType<typeof createChild>>>
     export type CreateChildMutationBody = BodyType<ChildInput>
-    export type CreateChildMutationError = ErrorType<unknown>
+    export type CreateChildMutationError = ErrorType<BadRequestResponse>
 
     /**
  * @summary Create a child profile
  */
-export const useCreateChild = <TError = ErrorType<unknown>,
+export const useCreateChild = <TError = ErrorType<BadRequestResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChild>>, TError,{data: BodyType<ChildInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createChild>>,
@@ -271,7 +273,7 @@ export const useCreateChild = <TError = ErrorType<unknown>,
       return useMutation(getCreateChildMutationOptions(options));
     }
 
-export const getGetChildUrl = (id: number,) => {
+export const getGetChildUrl = (id: Id,) => {
 
 
 
@@ -282,7 +284,7 @@ export const getGetChildUrl = (id: number,) => {
 /**
  * @summary Get a child profile by ID
  */
-export const getChild = async (id: number, options?: RequestInit): Promise<Child> => {
+export const getChild = async (id: Id, options?: RequestInit): Promise<Child> => {
 
   return customFetch<Child>(getGetChildUrl(id),
   {
@@ -297,14 +299,14 @@ export const getChild = async (id: number, options?: RequestInit): Promise<Child
 
 
 
-export const getGetChildQueryKey = (id: number,) => {
+export const getGetChildQueryKey = (id: Id,) => {
     return [
     `/api/children/${id}`
     ] as const;
     }
 
 
-export const getGetChildQueryOptions = <TData = Awaited<ReturnType<typeof getChild>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChild>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetChildQueryOptions = <TData = Awaited<ReturnType<typeof getChild>>, TError = ErrorType<BadRequestResponse | NotFoundResponse>>(id: Id, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChild>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -323,15 +325,15 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type GetChildQueryResult = NonNullable<Awaited<ReturnType<typeof getChild>>>
-export type GetChildQueryError = ErrorType<void>
+export type GetChildQueryError = ErrorType<BadRequestResponse | NotFoundResponse>
 
 
 /**
  * @summary Get a child profile by ID
  */
 
-export function useGetChild<TData = Awaited<ReturnType<typeof getChild>>, TError = ErrorType<void>>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChild>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useGetChild<TData = Awaited<ReturnType<typeof getChild>>, TError = ErrorType<BadRequestResponse | NotFoundResponse>>(
+ id: Id, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChild>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
@@ -348,7 +350,7 @@ export function useGetChild<TData = Awaited<ReturnType<typeof getChild>>, TError
 
 
 
-export const getUpdateChildUrl = (id: number,) => {
+export const getUpdateChildUrl = (id: Id,) => {
 
 
 
@@ -359,7 +361,7 @@ export const getUpdateChildUrl = (id: number,) => {
 /**
  * @summary Update a child profile
  */
-export const updateChild = async (id: number,
+export const updateChild = async (id: Id,
     childInput: ChildInput, options?: RequestInit): Promise<Child> => {
 
   return customFetch<Child>(getUpdateChildUrl(id),
@@ -375,9 +377,9 @@ export const updateChild = async (id: number,
 
 
 
-export const getUpdateChildMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChild>>, TError,{id: number;data: BodyType<ChildInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateChild>>, TError,{id: number;data: BodyType<ChildInput>}, TContext> => {
+export const getUpdateChildMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChild>>, TError,{id: Id;data: BodyType<ChildInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateChild>>, TError,{id: Id;data: BodyType<ChildInput>}, TContext> => {
 
 const mutationKey = ['updateChild'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -389,7 +391,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateChild>>, {id: number;data: BodyType<ChildInput>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateChild>>, {id: Id;data: BodyType<ChildInput>}> = (props) => {
           const {id,data} = props ?? {};
 
           return  updateChild(id,data,requestOptions)
@@ -404,90 +406,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UpdateChildMutationResult = NonNullable<Awaited<ReturnType<typeof updateChild>>>
     export type UpdateChildMutationBody = BodyType<ChildInput>
-    export type UpdateChildMutationError = ErrorType<void>
+    export type UpdateChildMutationError = ErrorType<BadRequestResponse | NotFoundResponse>
 
     /**
  * @summary Update a child profile
  */
-export const useUpdateChild = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChild>>, TError,{id: number;data: BodyType<ChildInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useUpdateChild = <TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChild>>, TError,{id: Id;data: BodyType<ChildInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateChild>>,
         TError,
-        {id: number;data: BodyType<ChildInput>},
+        {id: Id;data: BodyType<ChildInput>},
         TContext
       > => {
       return useMutation(getUpdateChildMutationOptions(options));
-    }
-
-export const getDeleteChildUrl = (id: number,) => {
-
-
-
-
-  return `/api/children/${id}`
-}
-
-/**
- * @summary Delete a child profile
- */
-export const deleteChild = async (id: number, options?: RequestInit): Promise<DeleteResult> => {
-
-  return customFetch<DeleteResult>(getDeleteChildUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-export const getDeleteChildMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChild>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteChild>>, TError,{id: number}, TContext> => {
-
-const mutationKey = ['deleteChild'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteChild>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteChild(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteChildMutationResult = NonNullable<Awaited<ReturnType<typeof deleteChild>>>
-
-    export type DeleteChildMutationError = ErrorType<void>
-
-    /**
- * @summary Delete a child profile
- */
-export const useDeleteChild = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChild>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteChild>>,
-        TError,
-        {id: number},
-        TContext
-      > => {
-      return useMutation(getDeleteChildMutationOptions(options));
     }
 
 export const getListAppsUrl = (params?: ListAppsParams,) => {
@@ -600,7 +532,7 @@ export const createApp = async (appInput: AppInput, options?: RequestInit): Prom
 
 
 
-export const getCreateAppMutationOptions = <TError = ErrorType<unknown>,
+export const getCreateAppMutationOptions = <TError = ErrorType<BadRequestResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createApp>>, TError,{data: BodyType<AppInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createApp>>, TError,{data: BodyType<AppInput>}, TContext> => {
 
@@ -629,12 +561,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CreateAppMutationResult = NonNullable<Awaited<ReturnType<typeof createApp>>>
     export type CreateAppMutationBody = BodyType<AppInput>
-    export type CreateAppMutationError = ErrorType<unknown>
+    export type CreateAppMutationError = ErrorType<BadRequestResponse>
 
     /**
  * @summary Add an app to the catalog
  */
-export const useCreateApp = <TError = ErrorType<unknown>,
+export const useCreateApp = <TError = ErrorType<BadRequestResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createApp>>, TError,{data: BodyType<AppInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createApp>>,
@@ -645,7 +577,7 @@ export const useCreateApp = <TError = ErrorType<unknown>,
       return useMutation(getCreateAppMutationOptions(options));
     }
 
-export const getGetAppUrl = (id: number,) => {
+export const getGetAppUrl = (id: Id,) => {
 
 
 
@@ -656,7 +588,7 @@ export const getGetAppUrl = (id: number,) => {
 /**
  * @summary Get an app by ID
  */
-export const getApp = async (id: number, options?: RequestInit): Promise<CatalogApp> => {
+export const getApp = async (id: Id, options?: RequestInit): Promise<CatalogApp> => {
 
   return customFetch<CatalogApp>(getGetAppUrl(id),
   {
@@ -671,14 +603,14 @@ export const getApp = async (id: number, options?: RequestInit): Promise<Catalog
 
 
 
-export const getGetAppQueryKey = (id: number,) => {
+export const getGetAppQueryKey = (id: Id,) => {
     return [
     `/api/apps/${id}`
     ] as const;
     }
 
 
-export const getGetAppQueryOptions = <TData = Awaited<ReturnType<typeof getApp>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApp>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetAppQueryOptions = <TData = Awaited<ReturnType<typeof getApp>>, TError = ErrorType<BadRequestResponse | NotFoundResponse>>(id: Id, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApp>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -697,15 +629,15 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type GetAppQueryResult = NonNullable<Awaited<ReturnType<typeof getApp>>>
-export type GetAppQueryError = ErrorType<void>
+export type GetAppQueryError = ErrorType<BadRequestResponse | NotFoundResponse>
 
 
 /**
  * @summary Get an app by ID
  */
 
-export function useGetApp<TData = Awaited<ReturnType<typeof getApp>>, TError = ErrorType<void>>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApp>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useGetApp<TData = Awaited<ReturnType<typeof getApp>>, TError = ErrorType<BadRequestResponse | NotFoundResponse>>(
+ id: Id, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApp>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
@@ -722,7 +654,7 @@ export function useGetApp<TData = Awaited<ReturnType<typeof getApp>>, TError = E
 
 
 
-export const getUpdateAppUrl = (id: number,) => {
+export const getUpdateAppUrl = (id: Id,) => {
 
 
 
@@ -733,7 +665,7 @@ export const getUpdateAppUrl = (id: number,) => {
 /**
  * @summary Update an app
  */
-export const updateApp = async (id: number,
+export const updateApp = async (id: Id,
     appInput: AppInput, options?: RequestInit): Promise<CatalogApp> => {
 
   return customFetch<CatalogApp>(getUpdateAppUrl(id),
@@ -749,9 +681,9 @@ export const updateApp = async (id: number,
 
 
 
-export const getUpdateAppMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateApp>>, TError,{id: number;data: BodyType<AppInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateApp>>, TError,{id: number;data: BodyType<AppInput>}, TContext> => {
+export const getUpdateAppMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateApp>>, TError,{id: Id;data: BodyType<AppInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateApp>>, TError,{id: Id;data: BodyType<AppInput>}, TContext> => {
 
 const mutationKey = ['updateApp'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -763,7 +695,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateApp>>, {id: number;data: BodyType<AppInput>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateApp>>, {id: Id;data: BodyType<AppInput>}> = (props) => {
           const {id,data} = props ?? {};
 
           return  updateApp(id,data,requestOptions)
@@ -778,94 +710,24 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UpdateAppMutationResult = NonNullable<Awaited<ReturnType<typeof updateApp>>>
     export type UpdateAppMutationBody = BodyType<AppInput>
-    export type UpdateAppMutationError = ErrorType<void>
+    export type UpdateAppMutationError = ErrorType<BadRequestResponse | NotFoundResponse>
 
     /**
  * @summary Update an app
  */
-export const useUpdateApp = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateApp>>, TError,{id: number;data: BodyType<AppInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useUpdateApp = <TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateApp>>, TError,{id: Id;data: BodyType<AppInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateApp>>,
         TError,
-        {id: number;data: BodyType<AppInput>},
+        {id: Id;data: BodyType<AppInput>},
         TContext
       > => {
       return useMutation(getUpdateAppMutationOptions(options));
     }
 
-export const getDeleteAppUrl = (id: number,) => {
-
-
-
-
-  return `/api/apps/${id}`
-}
-
-/**
- * @summary Delete an app from the catalog
- */
-export const deleteApp = async (id: number, options?: RequestInit): Promise<DeleteResult> => {
-
-  return customFetch<DeleteResult>(getDeleteAppUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-export const getDeleteAppMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApp>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteApp>>, TError,{id: number}, TContext> => {
-
-const mutationKey = ['deleteApp'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApp>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteApp(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteAppMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApp>>>
-
-    export type DeleteAppMutationError = ErrorType<void>
-
-    /**
- * @summary Delete an app from the catalog
- */
-export const useDeleteApp = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApp>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteApp>>,
-        TError,
-        {id: number},
-        TContext
-      > => {
-      return useMutation(getDeleteAppMutationOptions(options));
-    }
-
-export const getUpdateChildAppStatusUrl = (childId: number,
-    appId: number,) => {
+export const getUpdateChildAppStatusUrl = (childId: Id,
+    appId: Id,) => {
 
 
 
@@ -876,8 +738,8 @@ export const getUpdateChildAppStatusUrl = (childId: number,
 /**
  * @summary Upsert per-child app status
  */
-export const updateChildAppStatus = async (childId: number,
-    appId: number,
+export const updateChildAppStatus = async (childId: Id,
+    appId: Id,
     childAppStatusInput: ChildAppStatusInput, options?: RequestInit): Promise<ChildAppStatusRecord> => {
 
   return customFetch<ChildAppStatusRecord>(getUpdateChildAppStatusUrl(childId,appId),
@@ -893,9 +755,9 @@ export const updateChildAppStatus = async (childId: number,
 
 
 
-export const getUpdateChildAppStatusMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChildAppStatus>>, TError,{childId: number;appId: number;data: BodyType<ChildAppStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateChildAppStatus>>, TError,{childId: number;appId: number;data: BodyType<ChildAppStatusInput>}, TContext> => {
+export const getUpdateChildAppStatusMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChildAppStatus>>, TError,{childId: Id;appId: Id;data: BodyType<ChildAppStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateChildAppStatus>>, TError,{childId: Id;appId: Id;data: BodyType<ChildAppStatusInput>}, TContext> => {
 
 const mutationKey = ['updateChildAppStatus'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -907,7 +769,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateChildAppStatus>>, {childId: number;appId: number;data: BodyType<ChildAppStatusInput>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateChildAppStatus>>, {childId: Id;appId: Id;data: BodyType<ChildAppStatusInput>}> = (props) => {
           const {childId,appId,data} = props ?? {};
 
           return  updateChildAppStatus(childId,appId,data,requestOptions)
@@ -922,17 +784,17 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UpdateChildAppStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateChildAppStatus>>>
     export type UpdateChildAppStatusMutationBody = BodyType<ChildAppStatusInput>
-    export type UpdateChildAppStatusMutationError = ErrorType<unknown>
+    export type UpdateChildAppStatusMutationError = ErrorType<BadRequestResponse | NotFoundResponse>
 
     /**
  * @summary Upsert per-child app status
  */
-export const useUpdateChildAppStatus = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChildAppStatus>>, TError,{childId: number;appId: number;data: BodyType<ChildAppStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useUpdateChildAppStatus = <TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChildAppStatus>>, TError,{childId: Id;appId: Id;data: BodyType<ChildAppStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateChildAppStatus>>,
         TError,
-        {childId: number;appId: number;data: BodyType<ChildAppStatusInput>},
+        {childId: Id;appId: Id;data: BodyType<ChildAppStatusInput>},
         TContext
       > => {
       return useMutation(getUpdateChildAppStatusMutationOptions(options));

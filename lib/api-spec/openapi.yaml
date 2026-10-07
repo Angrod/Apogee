@@ -67,6 +67,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Child"
+        "400":
+          $ref: "#/components/responses/BadRequest"
 
   /children/{id}:
     get:
@@ -78,7 +80,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            $ref: "#/components/schemas/Id"
       responses:
         "200":
           description: Child profile
@@ -86,8 +88,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Child"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "404":
-          description: Not found
+          $ref: "#/components/responses/NotFound"
     put:
       operationId: updateChild
       tags: [children]
@@ -97,7 +101,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            $ref: "#/components/schemas/Id"
       requestBody:
         required: true
         content:
@@ -111,27 +115,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Child"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "404":
-          description: Not found
-    delete:
-      operationId: deleteChild
-      tags: [children]
-      summary: Delete a child profile
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Deleted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DeleteResult"
-        "404":
-          description: Not found
+          $ref: "#/components/responses/NotFound"
+
 
   /apps:
     get:
@@ -148,12 +136,12 @@ paths:
           in: query
           required: false
           schema:
-            type: string
+            $ref: "#/components/schemas/Category"
         - name: interestTag
           in: query
           required: false
           schema:
-            type: string
+            $ref: "#/components/schemas/InterestTag"
       responses:
         "200":
           description: List of apps
@@ -180,6 +168,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CatalogApp"
+        "400":
+          $ref: "#/components/responses/BadRequest"
 
   /apps/{id}:
     get:
@@ -191,7 +181,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            $ref: "#/components/schemas/Id"
       responses:
         "200":
           description: App
@@ -199,8 +189,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CatalogApp"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "404":
-          description: Not found
+          $ref: "#/components/responses/NotFound"
     put:
       operationId: updateApp
       tags: [apps]
@@ -210,7 +202,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            $ref: "#/components/schemas/Id"
       requestBody:
         required: true
         content:
@@ -224,27 +216,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CatalogApp"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "404":
-          description: Not found
-    delete:
-      operationId: deleteApp
-      tags: [apps]
-      summary: Delete an app from the catalog
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Deleted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DeleteResult"
-        "404":
-          description: Not found
+          $ref: "#/components/responses/NotFound"
+
 
   /child-app-status/{childId}/{appId}:
     put:
@@ -256,12 +232,12 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            $ref: "#/components/schemas/Id"
         - name: appId
           in: path
           required: true
           schema:
-            type: integer
+            $ref: "#/components/schemas/Id"
       requestBody:
         required: true
         content:
@@ -275,6 +251,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChildAppStatusRecord"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /export:
     get:
@@ -305,7 +285,69 @@ paths:
                   $ref: "#/components/schemas/DashboardEntry"
 
 components:
+  responses:
+    BadRequest:
+      description: The request was invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
   schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+
+    Id:
+      type: integer
+      multipleOf: 1
+      minimum: 1
+
+    InterestTag:
+      type: string
+      enum: [Engineering, Baking/Food, Music, Drawing, Reading, Math, Science, Gaming, Language Learning]
+
+    Category:
+      type: string
+      enum: [Games, Education, Creative, Music, Reading]
+
+    CostModel:
+      type: string
+      enum: [Free, One-time purchase, Subscription]
+
+    AdStatus:
+      type: string
+      enum: [No Ads, Minimal, Has Ads]
+
+    CatalogStatus:
+      type: string
+      description: Catalog soft delete. Removed apps keep their record and notes.
+      enum: [Active, Removed]
+
+    InstallStatus:
+      type: string
+      description: Per-child install state. Tracked by the parent; Apogee does not install anything.
+      enum: [Not Installed, Pushed, Installed, Removed]
+
+    ScreenTimeMinutes:
+      type: integer
+      multipleOf: 1
+      minimum: 0
+      maximum: 1440
+
     HealthStatus:
       type: object
       properties:
@@ -314,34 +356,32 @@ components:
       required:
         - status
 
-    DeleteResult:
-      type: object
-      properties:
-        success:
-          type: boolean
-      required:
-        - success
-
     Child:
       type: object
       required: [id, name, age, interests, deviceName, screenTimeWeekday, screenTimeWeekend, appleArcade, createdAt, updatedAt]
       properties:
         id:
           type: integer
+          multipleOf: 1
         name:
           type: string
+          minLength: 1
         age:
           type: integer
+          multipleOf: 1
+          minimum: 1
+          maximum: 17
         interests:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/InterestTag"
         deviceName:
           type: string
+          minLength: 1
         screenTimeWeekday:
-          type: integer
+          $ref: "#/components/schemas/ScreenTimeMinutes"
         screenTimeWeekend:
-          type: integer
+          $ref: "#/components/schemas/ScreenTimeMinutes"
         appleArcade:
           type: boolean
         createdAt:
@@ -355,18 +395,23 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
         age:
           type: integer
+          multipleOf: 1
+          minimum: 1
+          maximum: 17
         interests:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/InterestTag"
         deviceName:
           type: string
+          minLength: 1
         screenTimeWeekday:
-          type: integer
+          $ref: "#/components/schemas/ScreenTimeMinutes"
         screenTimeWeekend:
-          type: integer
+          $ref: "#/components/schemas/ScreenTimeMinutes"
         appleArcade:
           type: boolean
 
@@ -376,30 +421,39 @@ components:
       properties:
         id:
           type: integer
+          multipleOf: 1
         name:
           type: string
+          minLength: 1
         appStoreUrl:
           type: string
+          format: uri
         category:
-          type: string
+          $ref: "#/components/schemas/Category"
         ageMin:
           type: integer
+          multipleOf: 1
+          minimum: 0
+          maximum: 17
         ageMax:
           type: integer
+          multipleOf: 1
+          minimum: 0
+          maximum: 17
         interestTags:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/InterestTag"
         costModel:
-          type: string
+          $ref: "#/components/schemas/CostModel"
         adStatus:
-          type: string
+          $ref: "#/components/schemas/AdStatus"
         notes:
           type: string
         lastVerified:
           type: string
         status:
-          type: string
+          $ref: "#/components/schemas/CatalogStatus"
         createdAt:
           type: string
         updatedAt:
@@ -407,30 +461,38 @@ components:
 
     AppInput:
       type: object
-      required: [name, appStoreUrl, category, ageMin, ageMax, interestTags, costModel, adStatus]
+      required: [name, appStoreUrl, category, ageMin, ageMax, interestTags, costModel, adStatus, notes, status]
       properties:
         name:
           type: string
+          minLength: 1
         appStoreUrl:
           type: string
+          format: uri
         category:
-          type: string
+          $ref: "#/components/schemas/Category"
         ageMin:
           type: integer
+          multipleOf: 1
+          minimum: 0
+          maximum: 17
         ageMax:
           type: integer
+          multipleOf: 1
+          minimum: 0
+          maximum: 17
         interestTags:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/InterestTag"
         costModel:
-          type: string
+          $ref: "#/components/schemas/CostModel"
         adStatus:
-          type: string
+          $ref: "#/components/schemas/AdStatus"
         notes:
           type: string
         status:
-          type: string
+          $ref: "#/components/schemas/CatalogStatus"
 
     ChildAppStatusRecord:
       type: object
@@ -438,12 +500,15 @@ components:
       properties:
         id:
           type: integer
+          multipleOf: 1
         childId:
           type: integer
+          multipleOf: 1
         appId:
           type: integer
+          multipleOf: 1
         status:
-          type: string
+          $ref: "#/components/schemas/InstallStatus"
         createdAt:
           type: string
         updatedAt:
@@ -454,7 +519,7 @@ components:
       required: [status]
       properties:
         status:
-          type: string
+          $ref: "#/components/schemas/InstallStatus"
 
     ExportData:
       type: object
@@ -480,7 +545,7 @@ components:
         app:
           $ref: "#/components/schemas/CatalogApp"
         childStatus:
-          type: string
+          $ref: "#/components/schemas/InstallStatus"
 
     DashboardEntry:
       type: object

@@ -53,7 +53,7 @@ function ChildCard({ child }: { child: { id: number; name: string; age: number; 
 
         {child.interests.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {(child.interests as string[]).map((tag) => (
+            {child.interests.map((tag) => (
               <InterestBadge key={tag} tag={tag} />
             ))}
           </div>

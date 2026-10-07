@@ -33,7 +33,7 @@ The current code only does the recording part. "Pushed" is a status marker. Unti
 - Change the OpenAPI spec first, then regenerate. Never hand-edit generated code in `lib/api-client-react` or `lib/api-zod`. Keep the OpenAPI title stable.
 - Screen time is stored in minutes; the UI shows hours.
 - `GET /api/dashboard` writes to the DB (it creates missing status rows).
-- `DELETE /api/apps/:id` hard-deletes, which breaks the soft-delete rule. Don't use it.
+- The API validates with the Zod schemas generated from `openapi.yaml`. Use `parse()` and `notFound()` from `artifacts/api-server/src/lib/http.ts` in new routes; never read `req.body` directly. Orval drops `integer`, so integer fields need `multipleOf: 1`. Don't trust `z.coerce.boolean()` on query strings (`"false"` becomes `true`).
 - There's no versioned migration history. The live DB has a UNIQUE *constraint* where the schema declares a unique *index*, so review diffs before `push`.
 - The web dev server proxies `/api` to `API_URL` (default `http://localhost:8080`), so run both processes.
 - No auth. Never commit `DATABASE_URL` or `.env` files.

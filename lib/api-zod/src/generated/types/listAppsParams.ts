@@ -5,9 +5,11 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { Category } from './category';
+import type { InterestTag } from './interestTag';
 
 export type ListAppsParams = {
 includeRemoved?: boolean;
-category?: string;
-interestTag?: string;
+category?: Category;
+interestTag?: InterestTag;
 };
