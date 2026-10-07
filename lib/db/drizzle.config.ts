@@ -12,7 +12,8 @@ try {
 // report a clear connection error without it.
 export default defineConfig({
   schema: path.join(__dirname, "./src/schema/index.ts"),
-  out: path.join(__dirname, "./migrations"),
+  // Relative on purpose: drizzle-kit prefixes "./" when reading snapshots, which breaks absolute paths.
+  out: "./migrations",
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL ?? "",

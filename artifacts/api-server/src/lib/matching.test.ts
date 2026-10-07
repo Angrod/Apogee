@@ -5,7 +5,7 @@ import { appMatchesChild } from "./matching";
 const now = new Date();
 const child = (o: Partial<Child> = {}): Child => ({
   id: 1, name: "C", age: 6, interests: ["Music"], deviceName: "d",
-  screenTimeWeekday: 60, screenTimeWeekend: 60, appleArcade: false, createdAt: now, updatedAt: now, ...o,
+  screenTimeWeekday: 60, screenTimeWeekend: 60, appleArcade: false, archived: false, createdAt: now, updatedAt: now, ...o,
 });
 const app = (o: Partial<App> = {}): App => ({
   id: 1, name: "A", appStoreUrl: "u", category: "Music", ageMin: 4, ageMax: 8, interestTags: ["Music"],

@@ -108,6 +108,8 @@ export interface Child {
   screenTimeWeekday: ScreenTimeMinutes;
   screenTimeWeekend: ScreenTimeMinutes;
   appleArcade: boolean;
+  /** Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list. */
+  archived: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -126,6 +128,8 @@ export interface ChildInput {
   screenTimeWeekday: ScreenTimeMinutes;
   screenTimeWeekend: ScreenTimeMinutes;
   appleArcade: boolean;
+  /** Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list. */
+  archived: boolean;
 }
 
 export interface CatalogApp {
@@ -214,6 +218,10 @@ export type BadRequestResponse = Error;
  * Not found
  */
 export type NotFoundResponse = Error;
+
+export type ListChildrenParams = {
+includeArchived?: boolean;
+};
 
 export type ListAppsParams = {
 includeRemoved?: boolean;

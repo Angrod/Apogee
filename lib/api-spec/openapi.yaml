@@ -40,7 +40,13 @@ paths:
     get:
       operationId: listChildren
       tags: [children]
-      summary: List all children
+      summary: List children (archived profiles only with includeArchived=true)
+      parameters:
+        - name: includeArchived
+          in: query
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: List of children
@@ -358,7 +364,7 @@ components:
 
     Child:
       type: object
-      required: [id, name, age, interests, deviceName, screenTimeWeekday, screenTimeWeekend, appleArcade, createdAt, updatedAt]
+      required: [id, name, age, interests, deviceName, screenTimeWeekday, screenTimeWeekend, appleArcade, archived, createdAt, updatedAt]
       properties:
         id:
           type: integer
@@ -384,6 +390,9 @@ components:
           $ref: "#/components/schemas/ScreenTimeMinutes"
         appleArcade:
           type: boolean
+        archived:
+          type: boolean
+          description: Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list.
         createdAt:
           type: string
         updatedAt:
@@ -391,7 +400,7 @@ components:
 
     ChildInput:
       type: object
-      required: [name, age, interests, deviceName, screenTimeWeekday, screenTimeWeekend, appleArcade]
+      required: [name, age, interests, deviceName, screenTimeWeekday, screenTimeWeekend, appleArcade, archived]
       properties:
         name:
           type: string
@@ -414,6 +423,9 @@ components:
           $ref: "#/components/schemas/ScreenTimeMinutes"
         appleArcade:
           type: boolean
+        archived:
+          type: boolean
+          description: Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list.
 
     CatalogApp:
       type: object

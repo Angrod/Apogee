@@ -87,6 +87,8 @@ The dashboard has one column at narrow widths, two at medium widths, and three a
 
 Open **Children**, then add or edit a profile.
 
+There is no delete. To retire a profile, edit it and turn on **Archived**: it leaves the dashboard and the default Children list, but its record and app statuses are kept. Use **Show archived** on the Children page to find it, and turn Archived off to bring it back.
+
 | Field                    | Meaning                                                      |
 | ------------------------ | ------------------------------------------------------------ |
 | Name                     | A display name for the child.                                |
@@ -203,9 +205,9 @@ Changes appear immediately (optimistic update). The card is disabled while its r
 
 These are independent. Removing an app for one child does not remove it for siblings.
 
-### Recovery limitation
+### Restoring a Removed app for one child
 
-Child-app records marked Removed are hidden from the dashboard. There is no "show removed for this child" control, so the parent cannot restore that pair through the UI once its card disappears. A developer can restore it through `PUT /api/child-app-status/:childId/:appId`.
+Apps marked Removed for a child move to a collapsed **Removed (n)** group at the bottom of that child's column. Open it and change the status to bring the app back. (Only apps that still match the child appear there; a Removed row for an app that no longer matches stays in the database and the export.)
 
 ### Status initialization
 
@@ -422,7 +424,6 @@ Commercial readiness would require:
 ### Known gaps worth prioritizing
 
 - Make the backend deletion policy match catalog soft deletion.
-- Add a parent-facing way to view and restore child-app Removed records.
 - Validate bodies, route IDs, allowed values, and relationships on the server.
 - Use an atomic upsert for status writes.
 - Invalidate dashboard data after catalog/profile changes.
@@ -452,7 +453,8 @@ Run `pnpm test`. It starts an in-memory Postgres with the real migrations, so no
 - Simulate a failed write; confirm the old status is restored (frontend, manual; verified by hand on 2026-10-07).
 - ✅ A Removed catalog app keeps its record and notes and leaves recommendations.
 - ✅ Restoring the catalog app brings the match back.
-- Check child-app removal/restoration once a restoration UI exists.
+- Mark an app Removed for one child; confirm it moves to that child's Removed group and can be restored (manual; verified 2026-10-07).
+- ✅ Archiving a child hides them from the list and dashboard; unarchiving restores their statuses.
 - ✅ Export contains all three collections, including Removed apps.
 - ✅ The database itself rejects invalid enums, ranges, duplicate pairs, and bad references.
 - Test narrow-screen navigation and the three-column desktop view (manual).

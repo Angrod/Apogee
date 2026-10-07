@@ -32,6 +32,7 @@ import type {
   HealthStatus,
   Id,
   ListAppsParams,
+  ListChildrenParams,
   NotFoundResponse
 } from './api.schemas';
 
@@ -125,20 +126,27 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
-export const getListChildrenUrl = () => {
+export const getListChildrenUrl = (params?: ListChildrenParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/children`
+  return stringifiedParams.length > 0 ? `/api/children?${stringifiedParams}` : `/api/children`
 }
 
 /**
- * @summary List all children
+ * @summary List children (archived profiles only with includeArchived=true)
  */
-export const listChildren = async ( options?: RequestInit): Promise<Child[]> => {
+export const listChildren = async (params?: ListChildrenParams, options?: RequestInit): Promise<Child[]> => {
 
-  return customFetch<Child[]>(getListChildrenUrl(),
+  return customFetch<Child[]>(getListChildrenUrl(params),
   {
     ...options,
     method: 'GET'
@@ -151,23 +159,23 @@ export const listChildren = async ( options?: RequestInit): Promise<Child[]> => 
 
 
 
-export const getListChildrenQueryKey = () => {
+export const getListChildrenQueryKey = (params?: ListChildrenParams,) => {
     return [
-    `/api/children`
+    `/api/children`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListChildrenQueryOptions = <TData = Awaited<ReturnType<typeof listChildren>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChildren>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListChildrenQueryOptions = <TData = Awaited<ReturnType<typeof listChildren>>, TError = ErrorType<unknown>>(params?: ListChildrenParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChildren>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListChildrenQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListChildrenQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChildren>>> = ({ signal }) => listChildren({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChildren>>> = ({ signal }) => listChildren(params, { signal, ...requestOptions });
 
 
 
@@ -181,15 +189,15 @@ export type ListChildrenQueryError = ErrorType<unknown>
 
 
 /**
- * @summary List all children
+ * @summary List children (archived profiles only with includeArchived=true)
  */
 
 export function useListChildren<TData = Awaited<ReturnType<typeof listChildren>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChildren>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: ListChildrenParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChildren>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListChildrenQueryOptions(options)
+  const queryOptions = getListChildrenQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

@@ -26,5 +26,6 @@ export * from './id';
 export * from './installStatus';
 export * from './interestTag';
 export * from './listAppsParams';
+export * from './listChildrenParams';
 export * from './notFoundResponse';
 export * from './screenTimeMinutes';

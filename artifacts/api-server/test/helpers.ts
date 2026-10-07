@@ -48,6 +48,7 @@ export const childInput = (overrides: Record<string, unknown> = {}) => ({
   screenTimeWeekday: 60,
   screenTimeWeekend: 90,
   appleArcade: false,
+  archived: false,
   ...overrides,
 });
 

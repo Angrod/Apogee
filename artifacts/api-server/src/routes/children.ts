@@ -5,8 +5,14 @@ import { notFound, parse } from "../lib/http";
 
 const router = Router();
 
-router.get("/children", async (_req, res) => {
-  const children = await db.select().from(childrenTable).orderBy(childrenTable.id);
+router.get("/children", async (req, res) => {
+  // Raw string on purpose: z.coerce.boolean() turns "false" into true.
+  const includeArchived = req.query.includeArchived === "true";
+  const children = await db
+    .select()
+    .from(childrenTable)
+    .where(includeArchived ? undefined : eq(childrenTable.archived, false))
+    .orderBy(childrenTable.id);
   res.json(children);
 });
 

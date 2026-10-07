@@ -42,6 +42,7 @@ const schema = z.object({
     .min(0, "Cannot be negative")
     .max(24, "Cannot exceed 24 hours"),
   appleArcade: z.boolean().default(false),
+  archived: z.boolean().default(false),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -112,6 +113,7 @@ function ChildFormContent({ childId }: { childId?: number }) {
       screenTimeWeekday: 2,
       screenTimeWeekend: 3,
       appleArcade: false,
+      archived: false,
     },
   });
 
@@ -125,12 +127,14 @@ function ChildFormContent({ childId }: { childId?: number }) {
         screenTimeWeekday: minutesToHours(existingChild.screenTimeWeekday),
         screenTimeWeekend: minutesToHours(existingChild.screenTimeWeekend),
         appleArcade: existingChild.appleArcade,
+        archived: existingChild.archived,
       });
     }
   }, [existingChild, reset]);
 
   const interests = watch("interests") ?? [];
   const appleArcade = watch("appleArcade");
+  const archived = watch("archived");
 
   function onSubmit(values: FormValues) {
     const payload = {
@@ -141,6 +145,7 @@ function ChildFormContent({ childId }: { childId?: number }) {
       screenTimeWeekday: hoursToMinutes(values.screenTimeWeekday),
       screenTimeWeekend: hoursToMinutes(values.screenTimeWeekend),
       appleArcade: values.appleArcade,
+      archived: values.archived,
     };
 
     if (childId !== undefined) {
@@ -262,6 +267,22 @@ function ChildFormContent({ childId }: { childId?: number }) {
           className="data-[state=checked]:bg-amber-600"
         />
       </div>
+
+      {isEditing && (
+        <div className="flex items-center justify-between rounded-lg border border-stone-200 p-4">
+          <div>
+            <p className="text-sm font-medium text-stone-700">Archived</p>
+            <p className="text-xs text-stone-400 mt-0.5">
+              Hides this profile from the dashboard and the Children list. Nothing is deleted; turn it off to bring them back.
+            </p>
+          </div>
+          <Switch
+            checked={archived}
+            onCheckedChange={(val) => setValue("archived", val)}
+            className="data-[state=checked]:bg-stone-500"
+          />
+        </div>
+      )}
 
       <div className="flex items-center gap-3 pt-2">
         <Button

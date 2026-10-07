@@ -53,6 +53,39 @@ describe("children", () => {
   });
 });
 
+describe("archiving children", () => {
+  it("hides archived profiles from the default list and the dashboard, keeping their data", async () => {
+    const kid = await create("/children", childInput({ interests: ["Science"] }));
+    const a = await create("/apps", appInput({ interestTags: ["Science"] }));
+    await api.call("PUT", `/child-app-status/${kid.id}/${a.id}`, { status: "Installed" });
+
+    const archived = await api.call("PUT", `/children/${kid.id}`, childInput({ name: kid.name, interests: ["Science"], archived: true }));
+    expect(archived.status).toBe(200);
+    expect(archived.json.archived).toBe(true);
+
+    const listIds = async (q: string) => (await api.call("GET", `/children${q}`)).json.map((c: { id: number }) => c.id);
+    expect(await listIds("")).not.toContain(kid.id);
+    expect(await listIds("?includeArchived=false")).not.toContain(kid.id);
+    expect(await listIds("?includeArchived=true")).toContain(kid.id);
+
+    const dashboardIds = async () => (await api.call("GET", "/dashboard")).json.map((e: any) => e.child.id);
+    expect(await dashboardIds()).not.toContain(kid.id);
+
+    // Unarchive: the profile and its statuses come back untouched.
+    await api.call("PUT", `/children/${kid.id}`, childInput({ name: kid.name, interests: ["Science"], archived: false }));
+    const entry = (await api.call("GET", "/dashboard")).json.find((e: any) => e.child.id === kid.id);
+    expect(entry.matchedApps.find((m: any) => m.app.id === a.id).childStatus).toBe("Installed");
+  });
+
+  it("requires archived on PUT so it can't be silently reset", async () => {
+    const kid = await create("/children", childInput());
+    const { archived: _a, ...withoutArchived } = childInput({ name: kid.name });
+    const res = await api.call("PUT", `/children/${kid.id}`, withoutArchived);
+    expect(res.status).toBe(400);
+    expect(res.json.details).toContain("archived: Required");
+  });
+});
+
 describe("catalog", () => {
   it("rejects bad apps", async () => {
     for (const overrides of [

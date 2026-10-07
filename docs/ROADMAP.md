@@ -5,14 +5,13 @@ What's being worked on, what's next, and what's waiting on someone outside the c
 _Last updated: 2026-10-07_
 
 ## Now
-**Local setup is done** (Homebrew Postgres 18, `.env`, `pnpm dev`). **Cleanup is complete.** All 7 steps of [AUDIT.md](AUDIT.md) are done: it builds on macOS, the bloat is removed, the bugs are fixed, the API and DB are hardened, migrations are versioned, and `pnpm test` runs the suite. Pick the next item below.
+**Undo and removal are done** (per-child Removed group, archived child profiles). **Local setup is done** (Homebrew Postgres 18, `.env`, `pnpm dev`). **Cleanup is complete.** All 7 steps of [AUDIT.md](AUDIT.md) are done: it builds on macOS, the bloat is removed, the bugs are fixed, the API and DB are hardened, migrations are versioned, and `pnpm test` runs the suite. Pick the next item below.
 
 ## Next (in order, each needs approval before starting)
-1. **Undo and removal gaps.** The cleanup fixed the other handoff gaps; still missing are a way to view and restore an app marked "Removed" for one child, and a way to archive a child profile (there's no delete).
-2. **Authentication.** Required before anything leaves the local network or a native app talks to the API.
-3. **Screen Time app spike.** A minimal native iOS app using FamilyControls, built as a development build on one of this household's iPads. It proves authorization, blocking one app, and a downtime schedule.
-4. **Connect Apogee to the Screen Time app.** The native app reads the child's profile and catalog from the Apogee API.
-5. **Smarter App Store flow.** An App Store ID per catalog app, deep links, and a "requested by kid" state.
+1. **Authentication.** Required before anything leaves the local network or a native app talks to the API.
+2. **Screen Time app spike.** A minimal native iOS app using FamilyControls, built as a development build on one of this household's iPads. It proves authorization, blocking one app, and a downtime schedule.
+3. **Connect Apogee to the Screen Time app.** The native app reads the child's profile and catalog from the Apogee API.
+4. **Smarter App Store flow.** An App Store ID per catalog app, deep links, and a "requested by kid" state.
 
 ## Waiting on things outside the code (can run in parallel)
 - [ ] Apple Developer account activation (Individual).

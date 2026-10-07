@@ -1,0 +1,1 @@
+ALTER TABLE "children" ADD COLUMN "archived" boolean DEFAULT false NOT NULL;

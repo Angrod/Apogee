@@ -18,8 +18,12 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * @summary List all children
+ * @summary List children (archived profiles only with includeArchived=true)
  */
+export const ListChildrenQueryParams = zod.object({
+  "includeArchived": zod.coerce.boolean().optional()
+})
+
 export const listChildrenResponseIdMultipleOf = 1;
 
 
@@ -46,6 +50,7 @@ export const ListChildrenResponseItem = zod.object({
   "screenTimeWeekday": zod.number().min(listChildrenResponseScreenTimeWeekdayMin).max(listChildrenResponseScreenTimeWeekdayMax).multipleOf(listChildrenResponseScreenTimeWeekdayMultipleOf),
   "screenTimeWeekend": zod.number().min(listChildrenResponseScreenTimeWeekendMin).max(listChildrenResponseScreenTimeWeekendMax).multipleOf(listChildrenResponseScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean(),
+  "archived": zod.boolean().describe('Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -77,7 +82,8 @@ export const CreateChildBody = zod.object({
   "deviceName": zod.string().min(1),
   "screenTimeWeekday": zod.number().min(createChildBodyScreenTimeWeekdayMin).max(createChildBodyScreenTimeWeekdayMax).multipleOf(createChildBodyScreenTimeWeekdayMultipleOf),
   "screenTimeWeekend": zod.number().min(createChildBodyScreenTimeWeekendMin).max(createChildBodyScreenTimeWeekendMax).multipleOf(createChildBodyScreenTimeWeekendMultipleOf),
-  "appleArcade": zod.boolean()
+  "appleArcade": zod.boolean(),
+  "archived": zod.boolean().describe('Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list.')
 })
 
 
@@ -118,6 +124,7 @@ export const GetChildResponse = zod.object({
   "screenTimeWeekday": zod.number().min(getChildResponseScreenTimeWeekdayMin).max(getChildResponseScreenTimeWeekdayMax).multipleOf(getChildResponseScreenTimeWeekdayMultipleOf),
   "screenTimeWeekend": zod.number().min(getChildResponseScreenTimeWeekendMin).max(getChildResponseScreenTimeWeekendMax).multipleOf(getChildResponseScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean(),
+  "archived": zod.boolean().describe('Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -156,7 +163,8 @@ export const UpdateChildBody = zod.object({
   "deviceName": zod.string().min(1),
   "screenTimeWeekday": zod.number().min(updateChildBodyScreenTimeWeekdayMin).max(updateChildBodyScreenTimeWeekdayMax).multipleOf(updateChildBodyScreenTimeWeekdayMultipleOf),
   "screenTimeWeekend": zod.number().min(updateChildBodyScreenTimeWeekendMin).max(updateChildBodyScreenTimeWeekendMax).multipleOf(updateChildBodyScreenTimeWeekendMultipleOf),
-  "appleArcade": zod.boolean()
+  "appleArcade": zod.boolean(),
+  "archived": zod.boolean().describe('Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list.')
 })
 
 export const updateChildResponseIdMultipleOf = 1;
@@ -185,6 +193,7 @@ export const UpdateChildResponse = zod.object({
   "screenTimeWeekday": zod.number().min(updateChildResponseScreenTimeWeekdayMin).max(updateChildResponseScreenTimeWeekdayMax).multipleOf(updateChildResponseScreenTimeWeekdayMultipleOf),
   "screenTimeWeekend": zod.number().min(updateChildResponseScreenTimeWeekendMin).max(updateChildResponseScreenTimeWeekendMax).multipleOf(updateChildResponseScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean(),
+  "archived": zod.boolean().describe('Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -450,6 +459,7 @@ export const ExportDataResponse = zod.object({
   "screenTimeWeekday": zod.number().min(exportDataResponseChildrenItemScreenTimeWeekdayMin).max(exportDataResponseChildrenItemScreenTimeWeekdayMax).multipleOf(exportDataResponseChildrenItemScreenTimeWeekdayMultipleOf),
   "screenTimeWeekend": zod.number().min(exportDataResponseChildrenItemScreenTimeWeekendMin).max(exportDataResponseChildrenItemScreenTimeWeekendMax).multipleOf(exportDataResponseChildrenItemScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean(),
+  "archived": zod.boolean().describe('Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })),
@@ -521,6 +531,7 @@ export const GetDashboardResponseItem = zod.object({
   "screenTimeWeekday": zod.number().min(getDashboardResponseChildScreenTimeWeekdayMin).max(getDashboardResponseChildScreenTimeWeekdayMax).multipleOf(getDashboardResponseChildScreenTimeWeekdayMultipleOf),
   "screenTimeWeekend": zod.number().min(getDashboardResponseChildScreenTimeWeekendMin).max(getDashboardResponseChildScreenTimeWeekendMax).multipleOf(getDashboardResponseChildScreenTimeWeekendMultipleOf),
   "appleArcade": zod.boolean(),
+  "archived": zod.boolean().describe('Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 }),

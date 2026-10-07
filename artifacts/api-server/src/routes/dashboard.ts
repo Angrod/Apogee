@@ -8,7 +8,7 @@ const router = Router();
 // matched child/app pair that doesn't have one yet.
 router.get("/dashboard", async (_req, res) => {
   const [children, apps, statuses] = await Promise.all([
-    db.select().from(childrenTable).orderBy(childrenTable.id),
+    db.select().from(childrenTable).where(eq(childrenTable.archived, false)).orderBy(childrenTable.id),
     db.select().from(appsTable).where(eq(appsTable.status, "Active")).orderBy(appsTable.name),
     db.select().from(childAppStatusTable),
   ]);

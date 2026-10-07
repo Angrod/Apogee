@@ -14,6 +14,9 @@ export const childrenTable = pgTable(
     screenTimeWeekday: integer("screen_time_weekday").notNull().default(0),
     screenTimeWeekend: integer("screen_time_weekend").notNull().default(0),
     appleArcade: boolean("apple_arcade").notNull().default(false),
+    // Soft delete: archived profiles keep their record and statuses but leave
+    // the dashboard and the default list. There is no hard delete.
+    archived: boolean("archived").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()

@@ -22,4 +22,6 @@ export interface ChildInput {
   screenTimeWeekday: ScreenTimeMinutes;
   screenTimeWeekend: ScreenTimeMinutes;
   appleArcade: boolean;
+  /** Soft delete. Archived profiles keep their record and statuses but leave the dashboard and the default list. */
+  archived: boolean;
 }

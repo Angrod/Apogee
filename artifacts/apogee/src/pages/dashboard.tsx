@@ -110,27 +110,39 @@ function ChildColumn({
   const { child, matchedApps } = entry;
 
   const grouped = useMemo(() => {
-    const groups: Record<string, DashboardAppEntry[]> = {
+    const groups: Record<AppStatus, DashboardAppEntry[]> = {
       Pushed: [],
       Installed: [],
       "Not Installed": [],
+      Removed: [],
     };
 
     for (const appEntry of matchedApps) {
-      const key = `${child.id}-${appEntry.app.id}`;
-      const rawStatus = statusOverrides.get(key) ?? appEntry.childStatus;
-
-      if (rawStatus === "Removed") continue;
       if (child.appleArcade && appEntry.app.category === "Games") continue;
-
-      const group = groups[rawStatus] ?? groups["Not Installed"];
-      group.push(appEntry);
+      const key = `${child.id}-${appEntry.app.id}`;
+      groups[statusOverrides.get(key) ?? appEntry.childStatus].push(appEntry);
     }
 
     return groups;
   }, [matchedApps, statusOverrides, child]);
 
   const hasArcadeGames = child.appleArcade && matchedApps.some((a) => a.app.category === "Games");
+
+  function renderCards(apps: DashboardAppEntry[]) {
+    return apps.map((appEntry) => {
+      const key = `${child.id}-${appEntry.app.id}`;
+      return (
+        <AppCard
+          key={key}
+          entry={appEntry}
+          childId={child.id}
+          localStatus={statusOverrides.get(key) ?? appEntry.childStatus}
+          onStatusChange={onStatusChange}
+          isMutating={mutatingKeys.has(key)}
+        />
+      );
+    });
+  }
 
   return (
     <div className="flex flex-col min-w-0">
@@ -158,32 +170,26 @@ function ChildColumn({
       <div className="space-y-4">
         {(["Pushed", "Installed", "Not Installed"] as const).map((groupName) => {
           const apps = grouped[groupName];
-          if (!apps || apps.length === 0) return null;
+          if (apps.length === 0) return null;
           return (
             <div key={groupName}>
               <p className={`text-xs font-semibold uppercase tracking-wide mb-2 ${GROUP_HEADER_COLORS[groupName]}`}>
                 {groupName} ({apps.length})
               </p>
-              <div className="space-y-2">
-                {apps.map((appEntry) => {
-                  const key = `${child.id}-${appEntry.app.id}`;
-                  const localStatus =
-                    statusOverrides.get(key) ?? appEntry.childStatus;
-                  return (
-                    <AppCard
-                      key={key}
-                      entry={appEntry}
-                      childId={child.id}
-                      localStatus={localStatus}
-                      onStatusChange={onStatusChange}
-                      isMutating={mutatingKeys.has(key)}
-                    />
-                  );
-                })}
-              </div>
+              <div className="space-y-2">{renderCards(apps)}</div>
             </div>
           );
         })}
+
+        {grouped.Removed.length > 0 && (
+          // Collapsed by default; change a status here to bring the app back.
+          <details>
+            <summary className="text-xs font-semibold uppercase tracking-wide text-stone-400 cursor-pointer select-none">
+              Removed ({grouped.Removed.length})
+            </summary>
+            <div className="space-y-2 mt-2">{renderCards(grouped.Removed)}</div>
+          </details>
+        )}
 
         {Object.values(grouped).every((g) => g.length === 0) &&
           !hasArcadeGames && (
