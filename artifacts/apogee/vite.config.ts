@@ -66,6 +66,10 @@ export default defineConfig({
     fs: {
       strict: true,
     },
+    // Browser calls go to /api on this origin; forward them to the Express API.
+    proxy: {
+      "/api": process.env.API_URL ?? "http://localhost:8080",
+    },
   },
   preview: {
     port,

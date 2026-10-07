@@ -30,11 +30,10 @@ The current code only does the recording part. "Pushed" is a status marker. Unti
 - Web: `PORT=3000 BASE_PATH=/ pnpm --filter @workspace/apogee run dev`
 
 ## Gotchas
-- **Local builds are broken on macOS** until AUDIT §1.1 is fixed (`pnpm-workspace.yaml` overrides strip the darwin-arm64 esbuild/rollup binaries). `tsc` still works.
 - Change the OpenAPI spec first, then regenerate. Never hand-edit generated code in `lib/api-client-react` or `lib/api-zod`. Keep the OpenAPI title stable.
 - Screen time is stored in minutes; the UI shows hours.
 - `GET /api/dashboard` writes to the DB (it creates missing status rows).
 - `DELETE /api/apps/:id` hard-deletes, which breaks the soft-delete rule. Don't use it.
 - There's no versioned migration history. The live DB has a UNIQUE *constraint* where the schema declares a unique *index*, so review diffs before `push`.
-- There's no local `/api` proxy yet (Replit's router handled this).
+- The web dev server proxies `/api` to `API_URL` (default `http://localhost:8080`), so run both processes.
 - No auth. Never commit `DATABASE_URL` or `.env` files.

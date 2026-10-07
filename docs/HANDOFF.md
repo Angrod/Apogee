@@ -381,7 +381,7 @@ PORT=8080 pnpm --filter @workspace/api-server run dev
 PORT=3000 BASE_PATH=/ pnpm --filter @workspace/apogee run dev
 ```
 
-The browser calls `/api/...` on the frontend origin, and there is currently **no Vite proxy**. In Replit, the platform router handled this. Locally you need a proxy so that:
+The browser calls `/api/...` on the frontend origin. In Replit, the platform router handled this. Locally, the Vite dev server now proxies `/api` to `API_URL` (default `http://localhost:8080`). In production you still need a reverse proxy so that:
 
 ```
 /api/*  -> Express API (preserving the /api prefix)

@@ -16,14 +16,14 @@ Severity: 🔴 must fix · 🟠 bug or risk · 🟡 cleanup · ⚪ note
 
 ## 1. Blockers
 
-### 🔴 1.1 The app cannot build or run on macOS
+### ✅ 1.1 The app cannot build or run on macOS (fixed in step 1)
 `pnpm-workspace.yaml` `overrides` strip the native binaries for every platform except Linux x64, including **darwin-arm64** for esbuild, rollup, lightningcss, and Tailwind's oxide. Replit did this to shrink its Linux installs.
 
 **Verified on the M1:** `pnpm install` succeeds but installs no native binaries. `node build.mjs` (API) and `vite build` (web) both crash on a missing native module. TypeScript still passes because `tsc` is pure JavaScript.
 
 **Fix:** delete the platform `overrides` block and the Replit `minimumReleaseAgeExclude` entries, then regenerate `pnpm-lock.yaml`. pnpm 11 also needs `esbuild` approved for build scripts (`onlyBuiltDependencies` already lists it, but a fresh install still reported `ERR_PNPM_IGNORED_BUILDS`).
 
-### 🔴 1.2 No local routing between web and API
+### ✅ 1.2 No local routing between web and API (fixed in step 1)
 The browser calls `/api/...` on the web app's own origin. On Replit, the platform router sent those calls to port 8080. Locally nothing does. **Fix:** add a `server.proxy` for `/api` in `artifacts/apogee/vite.config.ts`.
 
 ---
@@ -136,7 +136,7 @@ App and child saves don't invalidate the dashboard query, so new matches can tak
 
 Each step is a separate, reviewable change.
 
-1. **Make it run locally:** fix the workspace overrides and lockfile (1.1) and add the Vite `/api` proxy (1.2). Without this nothing else can be tested.
+1. ✅ **Make it run locally:** fix the workspace overrides and lockfile (1.1) and add the Vite `/api` proxy (1.2). Without this nothing else can be tested.
 2. **Remove Replit leftovers and bloat** (§4, §5): mockup sandbox, unused UI and packages, Replit config and plugins, `index.html` placeholders, `noindex`. Pure deletion; verified by typecheck, build, and clicking through.
 3. **Fix the data-loss and drift bugs** (2.1, 2.2, 2.6, 2.7, 2.8): frontend only.
 4. **Harden the API** (2.3, 2.4, 2.5): enums in the spec, validation with the generated schemas, a JSON error handler, an atomic upsert, removed or replaced DELETEs.
