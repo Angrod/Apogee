@@ -15,7 +15,7 @@ pnpm workspace · React + Vite + Tailwind · Express 5 · PostgreSQL + Drizzle �
 ```
 artifacts/apogee/       React web app
 artifacts/api-server/   Express API (/api)
-lib/db/                 Drizzle schema + seed
+lib/db/                 Drizzle schema, migrations, seed
 lib/api-spec/           OpenAPI contract (source of truth)
 lib/api-client-react/   Generated React Query hooks
 lib/api-zod/            Generated Zod schemas
@@ -28,7 +28,7 @@ docs/                   Handoff guide + original brief
 pnpm install --frozen-lockfile
 export DATABASE_URL=postgres://...         # never commit this
 
-pnpm --filter @workspace/db run push       # dev DB only
+pnpm --filter @workspace/db run migrate    # apply versioned migrations
 pnpm --filter @workspace/db run seed
 
 PORT=8080 pnpm --filter @workspace/api-server run dev

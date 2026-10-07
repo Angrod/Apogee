@@ -63,7 +63,7 @@ router.put("/apps/:id", async (req, res) => {
   assertAgeRange(body);
   const [app] = await db
     .update(appsTable)
-    .set({ ...body, lastVerified: today(), updatedAt: new Date() })
+    .set({ ...body, lastVerified: today() })
     .where(eq(appsTable.id, id))
     .returning();
   if (!app) throw notFound("App");

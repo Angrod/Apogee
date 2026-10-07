@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLinkIcon, RocketIcon, GamepadIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { INSTALL_STATUSES, costColor } from "@/lib/catalog";
+import { costColor } from "@/lib/catalog";
 
 // Dropdown order: what the parent is working on first.
 const STATUS_ORDER: InstallStatus[] = ["Pushed", "Installed", "Not Installed", "Removed"];
@@ -29,11 +29,6 @@ const GROUP_HEADER_COLORS: Record<string, string> = {
   Installed: "text-green-700",
   "Not Installed": "text-stone-500",
 };
-
-// The DB enum still has legacy values (Blocked, Limited) the UI doesn't offer.
-function toAppStatus(s: string): AppStatus {
-  return (INSTALL_STATUSES as string[]).includes(s) ? (s as AppStatus) : "Not Installed";
-}
 
 type StatusKey = string;
 
@@ -123,7 +118,7 @@ function ChildColumn({
 
     for (const appEntry of matchedApps) {
       const key = `${child.id}-${appEntry.app.id}`;
-      const rawStatus = statusOverrides.get(key) ?? toAppStatus(appEntry.childStatus);
+      const rawStatus = statusOverrides.get(key) ?? appEntry.childStatus;
 
       if (rawStatus === "Removed") continue;
       if (child.appleArcade && appEntry.app.category === "Games") continue;
@@ -173,7 +168,7 @@ function ChildColumn({
                 {apps.map((appEntry) => {
                   const key = `${child.id}-${appEntry.app.id}`;
                   const localStatus =
-                    statusOverrides.get(key) ?? toAppStatus(appEntry.childStatus);
+                    statusOverrides.get(key) ?? appEntry.childStatus;
                   return (
                     <AppCard
                       key={key}

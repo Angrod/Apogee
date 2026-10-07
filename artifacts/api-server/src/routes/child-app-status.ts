@@ -17,7 +17,7 @@ router.put("/child-app-status/:childId/:appId", async (req, res) => {
       .values({ childId, appId, status })
       .onConflictDoUpdate({
         target: [childAppStatusTable.childId, childAppStatusTable.appId],
-        set: { status, updatedAt: new Date() },
+        set: { status },
       })
       .returning();
     res.json(record);

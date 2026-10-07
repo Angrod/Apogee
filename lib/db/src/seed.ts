@@ -1,9 +1,15 @@
-import { db } from "./index";
+import { db, pool } from "./index";
 import { appsTable } from "./schema/apps";
 import { childrenTable } from "./schema/children";
 import { eq } from "drizzle-orm";
 
-const seedApps = [
+type NewApp = typeof appsTable.$inferInsert;
+type NewChild = typeof childrenTable.$inferInsert;
+
+// Starter catalog. Pricing, ad, and listing details were checked on
+// 2026-10-07; re-verify before relying on them. Age ranges are the parent's
+// picks, not App Store ratings.
+const seedApps: NewApp[] = [
   {
     name: "Khan Academy Kids",
     appStoreUrl: "https://apps.apple.com/us/app/khan-academy-kids/id1378467277",
@@ -13,35 +19,29 @@ const seedApps = [
     interestTags: ["Math", "Reading", "Science"],
     costModel: "Free",
     adStatus: "No Ads",
-    notes: "Comprehensive early learning with adaptive curriculum. No ads, fully free.",
-    status: "Active",
-    lastVerified: new Date().toISOString().split("T")[0],
+    notes: "Adaptive early-learning curriculum. Free, no ads, no in-app purchases.",
   },
   {
     name: "GarageBand",
     appStoreUrl: "https://apps.apple.com/us/app/garageband/id408709785",
     category: "Music",
-    ageMin: 6,
+    ageMin: 3,
     ageMax: 17,
     interestTags: ["Music"],
     costModel: "Free",
     adStatus: "No Ads",
-    notes: "Apple's full-featured music creation app. Excellent for music interest.",
-    status: "Active",
-    lastVerified: new Date().toISOString().split("T")[0],
+    notes: "Apple's music studio. Smart Drums works for toddlers who just tap. Apple rates it 4+; set to 3 on purpose.",
   },
   {
     name: "Aqua by Adobe",
-    appStoreUrl: "https://apps.apple.com/us/app/adobe-photoshop-sketch/id528542440",
+    appStoreUrl: "https://apps.apple.com/app/id6751648936",
     category: "Creative",
-    ageMin: 8,
-    ageMax: 17,
+    ageMin: 5,
+    ageMax: 12,
     interestTags: ["Drawing"],
     costModel: "Free",
     adStatus: "No Ads",
-    notes: "Adobe watercolor painting app with natural media brushes. Great for creative expression.",
-    status: "Active",
-    lastVerified: new Date().toISOString().split("T")[0],
+    notes: "Adobe's drawing and coloring app built for kids 5–12. Ad-free. Listed as \"Project Aqua: Adobe for Kids\".",
   },
   {
     name: "Cargo-Bot",
@@ -52,9 +52,7 @@ const seedApps = [
     interestTags: ["Engineering", "Math"],
     costModel: "Free",
     adStatus: "No Ads",
-    notes: "Programming puzzle game. Teaches logic and sequencing through robot commands.",
-    status: "Active",
-    lastVerified: new Date().toISOString().split("T")[0],
+    notes: "Programming puzzles: teaches logic and sequencing through robot commands.",
   },
   {
     name: "Duolingo ABC",
@@ -65,9 +63,7 @@ const seedApps = [
     interestTags: ["Reading", "Language Learning"],
     costModel: "Free",
     adStatus: "No Ads",
-    notes: "Learn to read with phonics. Designed for young learners, no ads.",
-    status: "Active",
-    lastVerified: new Date().toISOString().split("T")[0],
+    notes: "Phonics and early reading for young learners.",
   },
   {
     name: "PBS Kids Games",
@@ -78,9 +74,7 @@ const seedApps = [
     interestTags: ["Math", "Science", "Reading"],
     costModel: "Free",
     adStatus: "No Ads",
-    notes: "Games featuring Curious George, Daniel Tiger, and more. Safe and educational.",
-    status: "Active",
-    lastVerified: new Date().toISOString().split("T")[0],
+    notes: "Games with Curious George, Daniel Tiger, and more.",
   },
   {
     name: "Toca Boca Jr",
@@ -88,12 +82,10 @@ const seedApps = [
     category: "Games",
     ageMin: 2,
     ageMax: 6,
-    interestTags: ["Drawing"],
-    costModel: "Free",
+    interestTags: ["Drawing", "Gaming"],
+    costModel: "Subscription",
     adStatus: "No Ads",
-    notes: "Open-ended creative play worlds from Toca Boca. No ads, no in-app pressure.",
-    status: "Active",
-    lastVerified: new Date().toISOString().split("T")[0],
+    notes: "Bundles Toca Boca's classic apps (the standalone ones were pulled in 2024). About $7.99/month, or part of the Piknik plan.",
   },
   {
     name: "Simple Machines by Tinybop",
@@ -104,9 +96,7 @@ const seedApps = [
     interestTags: ["Engineering", "Science"],
     costModel: "One-time purchase",
     adStatus: "No Ads",
-    notes: "Explore levers, wheels, pulleys, inclined planes. Hands-on STEM learning.",
-    status: "Active",
-    lastVerified: new Date().toISOString().split("T")[0],
+    notes: "Levers, wheels, pulleys, inclined planes. Hands-on STEM.",
   },
   {
     name: "Sketchbook",
@@ -117,89 +107,82 @@ const seedApps = [
     interestTags: ["Drawing"],
     costModel: "Free",
     adStatus: "No Ads",
-    notes: "Full-featured drawing app with layers and brushes. Autodesk made this free.",
-    status: "Active",
-    lastVerified: new Date().toISOString().split("T")[0],
+    notes: "Full drawing app with layers and brushes; better for older kids.",
   },
   {
     name: "Endless Alphabet",
-    appStoreUrl: "https://apps.apple.com/us/app/endless-alphabet/id741853767",
+    appStoreUrl: "https://apps.apple.com/us/app/endless-alphabet/id591626572",
     category: "Reading",
     ageMin: 2,
     ageMax: 6,
     interestTags: ["Reading", "Language Learning"],
-    costModel: "Free",
+    costModel: "One-time purchase",
     adStatus: "No Ads",
-    notes: "Vocabulary building through animated puzzles. Charming and effective for early learners.",
-    status: "Active",
-    lastVerified: new Date().toISOString().split("T")[0],
+    notes: "Vocabulary through animated puzzles. About $8.99, no in-app purchases.",
   },
 ];
 
-const seedChildren = [
+// Placeholder profiles for development. The repo is public: never put real
+// family details here. Ages and interests are chosen so every profile matches
+// several starter apps.
+const seedChildren: NewChild[] = [
   {
-    name: "Olivia",
-    age: 8,
-    interests: ["Drawing", "Reading", "Music"],
-    deviceName: "Olivia's iPad",
-    screenTimeWeekday: 90,
-    screenTimeWeekend: 120,
+    name: "Sample Child A",
+    age: 3,
+    interests: ["Music", "Drawing"],
+    deviceName: "iPad A",
+    screenTimeWeekday: 45,
+    screenTimeWeekend: 60,
     appleArcade: false,
   },
   {
-    name: "Marcus",
-    age: 11,
-    interests: ["Engineering", "Gaming", "Math", "Science"],
-    deviceName: "Marcus's iPad",
-    screenTimeWeekday: 120,
-    screenTimeWeekend: 180,
-    appleArcade: true,
-  },
-  {
-    name: "Zoe",
+    name: "Sample Child B",
     age: 6,
-    interests: ["Reading", "Baking/Food", "Music"],
-    deviceName: "Zoe's iPad",
+    interests: ["Reading", "Baking/Food", "Drawing"],
+    deviceName: "iPad B",
     screenTimeWeekday: 60,
     screenTimeWeekend: 90,
     appleArcade: false,
   },
+  {
+    name: "Sample Child C",
+    age: 9,
+    interests: ["Engineering", "Math", "Science", "Gaming"],
+    deviceName: "iPad C",
+    screenTimeWeekday: 90,
+    screenTimeWeekend: 120,
+    appleArcade: true,
+  },
 ];
 
+// Inserts rows whose name doesn't exist yet. Never overwrites existing rows,
+// so it's safe to re-run; it is not a way to update catalog entries.
 async function seed() {
-  console.log("Seeding apps...");
   for (const app of seedApps) {
-    const existing = await db
-      .select()
-      .from(appsTable)
-      .where(eq(appsTable.name, app.name));
+    const existing = await db.select().from(appsTable).where(eq(appsTable.name, app.name));
     if (existing.length === 0) {
       await db.insert(appsTable).values(app);
-      console.log(`  Inserted: ${app.name}`);
+      console.log(`  app inserted: ${app.name}`);
     } else {
-      console.log(`  Skipped (already exists): ${app.name}`);
+      console.log(`  app skipped (exists): ${app.name}`);
     }
   }
 
-  console.log("Seeding children...");
   for (const child of seedChildren) {
-    const existing = await db
-      .select()
-      .from(childrenTable)
-      .where(eq(childrenTable.name, child.name));
+    const existing = await db.select().from(childrenTable).where(eq(childrenTable.name, child.name));
     if (existing.length === 0) {
       await db.insert(childrenTable).values(child);
-      console.log(`  Inserted: ${child.name}`);
+      console.log(`  child inserted: ${child.name}`);
     } else {
-      console.log(`  Skipped (already exists): ${child.name}`);
+      console.log(`  child skipped (exists): ${child.name}`);
     }
   }
-
-  console.log("Seeding complete.");
-  process.exit(0);
 }
 
-seed().catch((err) => {
-  console.error("Seed failed:", err);
-  process.exit(1);
-});
+seed()
+  .then(() => console.log("Seeding complete."))
+  .catch((err) => {
+    console.error("Seed failed:", err);
+    process.exitCode = 1;
+  })
+  .finally(() => pool.end());

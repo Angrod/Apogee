@@ -1,16 +1,10 @@
-import { pgTable, serial, integer, timestamp, pgEnum, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, timestamp, unique, index } from "drizzle-orm/pg-core";
 import { childrenTable } from "./children";
 import { appsTable } from "./apps";
+import { installStatusEnum } from "./enums";
 
-export const childAppStatusEnum = pgEnum("child_app_status_enum", [
-  "Installed",
-  "Not Installed",
-  "Blocked",
-  "Limited",
-  "Pushed",
-  "Removed",
-]);
-
+// One row per child/app pair: the same catalog app can be Installed for one
+// sibling and Not Installed for another.
 export const childAppStatusTable = pgTable(
   "child_app_status",
   {
@@ -21,16 +15,17 @@ export const childAppStatusTable = pgTable(
     appId: integer("app_id")
       .notNull()
       .references(() => appsTable.id),
-    status: childAppStatusEnum("status").notNull().default("Not Installed"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    status: installStatusEnum("status").notNull().default("Not Installed"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
-  (table) => [
-    uniqueIndex("child_app_status_child_id_app_id_unique").on(
-      table.childId,
-      table.appId
-    ),
-  ]
+  (t) => [
+    unique("child_app_status_child_id_app_id_unique").on(t.childId, t.appId),
+    index("child_app_status_app_id_idx").on(t.appId),
+  ],
 );
 
 export type ChildAppStatus = typeof childAppStatusTable.$inferSelect;

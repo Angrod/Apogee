@@ -101,19 +101,17 @@ Interest choices: Engineering, Baking/Food, Music, Drawing, Reading, Math, Scien
 
 Age does not advance automatically: there is no birthdate field or birthday calculation. Update ages as children grow.
 
-The form accepts screen time in hours, but the database and API store it in **minutes**. For example, 1.5 hours becomes 90 minutes. Existing values are displayed rounded to one decimal place in the editing form, so unusual minute values can lose precision when saved.
+The form accepts screen time in hours, but the database and API store it in **minutes**. For example, 1.5 hours becomes 90 minutes. The conversion is exact for every whole minute (`src/lib/screen-time.ts`).
 
 ### Starter profiles
 
-The seed script defines these initial profiles. These are source-code defaults, not a verification of the live database or of the family's real details.
+The seed script creates placeholder profiles for development. The repo is public, so it never contains real family details. Create the real profiles in the app.
 
-| Profile | Age | Interests                          | Weekday goal | Weekend goal | Arcade |
-| ------- | --- | ---------------------------------- | ------------ | ------------ | ------ |
-| Olivia  | 8   | Drawing, Reading, Music            | 1.5 hours    | 2 hours      | Off    |
-| Marcus  | 11  | Engineering, Gaming, Math, Science | 2 hours      | 3 hours      | On     |
-| Zoe     | 6   | Reading, Baking/Food, Music        | 1 hour       | 1.5 hours    | Off    |
-
-Device labels are each child's name followed by "'s iPad." Edit these defaults to match the actual household.
+| Profile        | Age | Interests                           | Weekday goal | Weekend goal | Arcade |
+| -------------- | --- | ----------------------------------- | ------------ | ------------ | ------ |
+| Sample Child A | 3   | Music, Drawing                      | 45 min       | 1 hour       | Off    |
+| Sample Child B | 6   | Reading, Baking/Food, Drawing       | 1 hour       | 1.5 hours    | Off    |
+| Sample Child C | 9   | Engineering, Math, Science, Gaming  | 1.5 hours    | 2 hours      | On     |
 
 ## 5. Maintaining the app catalog
 
@@ -256,19 +254,17 @@ The export is a portable data snapshot. It is **not** source code, not a Postgre
 | App                         | Category  | Ages | Cost model        |
 | --------------------------- | --------- | ---- | ----------------- |
 | Khan Academy Kids           | Education | 2–8  | Free              |
-| GarageBand                  | Music     | 6–17 | Free              |
-| Aqua by Adobe               | Creative  | 8–17 | Free              |
+| GarageBand                  | Music     | 3–17 | Free              |
+| Aqua by Adobe               | Creative  | 5–12 | Free              |
 | Cargo-Bot                   | Education | 7–14 | Free              |
 | Duolingo ABC                | Reading   | 3–6  | Free              |
 | PBS Kids Games              | Education | 2–8  | Free              |
-| Toca Boca Jr                | Games     | 2–6  | Free              |
+| Toca Boca Jr                | Games     | 2–6  | Subscription      |
 | Simple Machines by Tinybop  | Education | 4–10 | One-time purchase |
 | Sketchbook                  | Creative  | 6–17 | Free              |
-| Endless Alphabet            | Reading   | 2–6  | Free              |
+| Endless Alphabet            | Reading   | 2–6  | One-time purchase |
 
-All ten are seeded as Active and No Ads. These are starter metadata choices, not verified claims about availability, pricing, ads, or suitability.
-
-"Aqua by Adobe" is the name from the original brief, but its stored URL points to an Adobe Photoshop Sketch listing. The name/link identity needs manual review.
+All ten are seeded as Active and No Ads. Listings, pricing, and ads were checked on 2026-10-07 (Aqua's real listing, Endless Alphabet ~$8.99, Toca Boca Jr ~$7.99/month). Age ranges are the parent's picks: GarageBand is set to 3 for Smart Drums although Apple rates it 4+. Re-verify before relying on any of it.
 
 The seed script skips existing app and child names. It does not overwrite or update records and is not a sync/migration mechanism. Renamed entries can cause additional starter rows on a later seed run.
 
@@ -306,7 +302,7 @@ docs/                 This guide and the original brief
 
 ### Database tables
 
-- **children** — name, age, JSON interests, device name, weekday/weekend minutes, Arcade access, timestamps.
+- **children** — name, age, interests (`interest_tag[]`), device name, weekday/weekend minutes, Arcade access, timestamps.
 - **apps** — name, App Store URL, category, age range, interest-tag array, cost model, ad status, notes, last-verified date, Active/Removed status, timestamps.
 - **child_app_status** — child FK, app FK, current installation status, timestamps.
 
@@ -314,11 +310,9 @@ The relationship must remain per child/per app. A single status on the shared `a
 
 ### Uniqueness and concurrency
 
-A prior change applied a database UNIQUE constraint on `(child_id, app_id)`. The source schema declares a unique *index* with the same name, `child_app_status_child_id_app_id_unique`. These are not identical schema objects — inspect migration diffs before syncing an existing database.
+`(child_id, app_id)` has a UNIQUE constraint. Dashboard initialization uses conflict-ignore inserts, and the status endpoint is a single `INSERT … ON CONFLICT DO UPDATE`.
 
-Dashboard initialization uses conflict-ignore inserts. The status-update endpoint still does select-then-insert/update rather than an atomic upsert, so two simultaneous first writes can produce a failed request (duplicates are still prevented).
-
-The DB enum also retains legacy `Blocked` and `Limited` values. The UI exposes only Not Installed, Pushed, Installed, and Removed, and maps unknown statuses to Not Installed for display.
+Categories, cost models, ad labels, catalog status, install status, and interest tags are Postgres enums that match `openapi.yaml`. A compile-time check (`artifacts/api-server/src/lib/contract.ts`) fails the typecheck if they drift. Check constraints enforce the age and screen-time ranges and `age_min <= age_max`. `updated_at` is set automatically on every update.
 
 ## 13. API reference
 
@@ -357,11 +351,11 @@ Use pnpm only; the root `preinstall` rejects npm/Yarn.
 ### Initialize a fresh development database
 
 ```sh
-pnpm --filter @workspace/db run push
+pnpm --filter @workspace/db run migrate
 pnpm --filter @workspace/db run seed
 ```
 
-Only run against a disposable/dev database after reviewing the target. Do not force-push schemas against valuable data. There is no committed, versioned migration history covering prior live database changes.
+The schema is versioned in `lib/db/migrations/`. To change it: edit `lib/db/src/schema/`, run `pnpm --filter @workspace/db run generate --name <change>`, review the generated SQL, commit it, then `migrate`. Don't use `drizzle-kit push`.
 
 ### Running locally
 

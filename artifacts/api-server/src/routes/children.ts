@@ -30,7 +30,7 @@ router.put("/children/:id", async (req, res) => {
   const body = parse(UpdateChildBody, req.body);
   const [child] = await db
     .update(childrenTable)
-    .set({ ...body, updatedAt: new Date() })
+    .set(body)
     .where(eq(childrenTable.id, id))
     .returning();
   if (!child) throw notFound("Child");

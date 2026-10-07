@@ -178,6 +178,18 @@ Found during this step:
 
 Found during browser testing: tag toggles read the tag list captured at render time, so two clicks before a re-render lost the first one. They now read the live value with `getValues`. Verified in a browser: rapid double clicks save both tags, filters, and links. The API checks still pass 30/30.
 
+## Step 6 notes (done)
+There was no live data to preserve, so this is a clean baseline (`lib/db/migrations/0000_baseline.sql`) rather than a data migration.
+- **Postgres enums** for interest tags, category, cost model, ad status, catalog status, and install status. The legacy `Blocked`/`Limited` values are dropped. A compile-time contract (`api-server/src/lib/contract.ts`) ties them to the OpenAPI enums; a deliberate mismatch was tested and failed the typecheck.
+- `children.interests` is now `interest_tag[]`, the same type as `apps.interest_tags` (it used to be `jsonb`).
+- **Check constraints:** child age 1–17, screen time 0–1440, app ages 0–17, `age_min <= age_max`. The unique pair is a real UNIQUE constraint (the constraint-vs-index mismatch is gone). There's an index on `child_app_status.app_id`.
+- Timestamps are `timestamptz`, and `updated_at` updates automatically (also on upserts, verified in Drizzle's source and at runtime).
+- **Versioned migrations** (`generate`/`migrate`) replace `drizzle-kit push`.
+- **Seed corrections:** GarageBand ages 3–17, Aqua's real listing (ages 5–12), Toca Boca Jr is a Subscription, Endless Alphabet is a One-time purchase with the right listing ID. The placeholder children are clearly fake and cover ages 3/6/9. The seed closes its pool and reports failures through the exit code.
+- Verified on a fresh database: migrate (and re-migrate as a no-op), seed twice (13 inserted, then 13 skipped), and 7 direct-SQL bad inserts all rejected by the database. The API checks still pass 30/30.
+
+Still a product decision, not a bug: `lastVerified` is set on every save, so it means "last edited."
+
 ## Proposed cleanup order
 
 Each step is a separate, reviewable change.
@@ -187,5 +199,5 @@ Each step is a separate, reviewable change.
 3. ✅ **Fix the data-loss and drift bugs** (2.1, 2.2, 2.6, 2.7, 2.8): frontend only.
 4. ✅ **Harden the API** (2.3, 2.4, 2.5): enums in the spec, validation with the generated schemas, a JSON error handler, an atomic upsert, removed or replaced DELETEs.
 5. ✅ **Consolidate** (§6): shared constants from the spec, one matching function, the `<Link>`/`<Button>` fix, one Zod version.
-6. **Data:** correct the seed entries (§3), and plan the DB fixes (interests type, legacy enum values, constraint vs. index) as a reviewed migration against a backup.
+6. ✅ **Data:** correct the seed entries (§3), and plan the DB fixes (interests type, legacy enum values, constraint vs. index) as a reviewed migration against a backup.
 7. **Tests:** turn HANDOFF §17 into automated checks.
