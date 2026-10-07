@@ -31,7 +31,9 @@ The current code only does the recording part. "Pushed" is a status marker. Unti
 
 ## Gotchas
 - Change the OpenAPI spec first, then regenerate. Never hand-edit generated code in `lib/api-client-react` or `lib/api-zod`. Keep the OpenAPI title stable.
-- Screen time is stored in minutes; the UI shows hours.
+- Screen time is stored in minutes; the UI shows hours via `src/lib/screen-time.ts`.
+- Option lists (tags, categories, statuses) come from `src/lib/catalog.ts`, which is built from the generated enums. Add a value in `openapi.yaml`, not in a page.
+- Use `<Button asChild><Link/></Button>`, never a button inside a link.
 - `GET /api/dashboard` writes to the DB (it creates missing status rows).
 - The API validates with the Zod schemas generated from `openapi.yaml`. Use `parse()` and `notFound()` from `artifacts/api-server/src/lib/http.ts` in new routes; never read `req.body` directly. Orval drops `integer`, so integer fields need `multipleOf: 1`. Don't trust `z.coerce.boolean()` on query strings (`"false"` becomes `true`).
 - There's no versioned migration history. The live DB has a UNIQUE *constraint* where the schema declares a unique *index*, so review diffs before `push`.

@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { useListChildren } from "@workspace/api-client-react";
+import type { Child } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,7 @@ function InterestBadge({ tag }: { tag: string }) {
   );
 }
 
-function ChildCard({ child }: { child: { id: number; name: string; age: number; deviceName: string; interests: string[]; screenTimeWeekday: number; screenTimeWeekend: number; appleArcade: boolean } }) {
+function ChildCard({ child }: { child: Child }) {
   return (
     <Card className="border-stone-200 hover:border-amber-300 transition-colors">
       <CardHeader className="pb-3">
@@ -24,11 +25,9 @@ function ChildCard({ child }: { child: { id: number; name: string; age: number; 
             <CardTitle className="text-lg text-stone-900">{child.name}</CardTitle>
             <p className="text-sm text-stone-500 mt-0.5">Age {child.age}</p>
           </div>
-          <Link href={`/children/${child.id}`}>
-            <Button variant="outline" size="sm" className="text-stone-600 hover:text-amber-800 hover:border-amber-300">
-              Edit
-            </Button>
-          </Link>
+          <Button asChild variant="outline" size="sm" className="text-stone-600 hover:text-amber-800 hover:border-amber-300">
+            <Link href={`/children/${child.id}`}>Edit</Link>
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -98,12 +97,12 @@ export default function ChildrenList() {
           <h1 className="text-2xl font-bold text-stone-900">Children</h1>
           <p className="text-sm text-stone-500 mt-1">Manage profiles for each child's iPad.</p>
         </div>
-        <Link href="/children/new">
-          <Button className="bg-amber-600 hover:bg-amber-700 text-white gap-1.5">
+        <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white gap-1.5">
+          <Link href="/children/new">
             <PlusIcon className="h-4 w-4" />
             Add Child
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       {isError && (
@@ -122,19 +121,19 @@ export default function ChildrenList() {
         <div className="text-center py-16 text-stone-500">
           <p className="text-lg font-medium mb-1">No children yet</p>
           <p className="text-sm mb-4">Add your first child profile to get started.</p>
-          <Link href="/children/new">
-            <Button variant="outline" className="gap-1.5">
+          <Button asChild variant="outline" className="gap-1.5">
+            <Link href="/children/new">
               <PlusIcon className="h-4 w-4" />
               Add Child
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       )}
 
       {children && children.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {children.map((child) => (
-            <ChildCard key={child.id} child={child as typeof child & { interests: string[] }} />
+            <ChildCard key={child.id} child={child} />
           ))}
         </div>
       )}

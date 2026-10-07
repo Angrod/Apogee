@@ -1,102 +1,51 @@
 import { Router } from "express";
-import { db } from "@workspace/db";
-import { childrenTable, appsTable, childAppStatusTable } from "@workspace/db";
-import { eq, and, inArray } from "drizzle-orm";
+import { db, childrenTable, appsTable, childAppStatusTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { appMatchesChild } from "../lib/matching";
 
 const router = Router();
 
+// Note: this GET also writes. It creates a "Not Installed" status row for any
+// matched child/app pair that doesn't have one yet.
 router.get("/dashboard", async (_req, res) => {
   const [children, apps, statuses] = await Promise.all([
-    db.select().from(childrenTable).orderBy(childrenTable.name),
+    db.select().from(childrenTable).orderBy(childrenTable.id),
     db.select().from(appsTable).where(eq(appsTable.status, "Active")).orderBy(appsTable.name),
     db.select().from(childAppStatusTable),
   ]);
 
-  const statusIndex = new Map(
-    statuses.map((s) => [`${s.childId}-${s.appId}`, s.status])
+  const key = (childId: number, appId: number) => `${childId}-${appId}`;
+  const statusIndex = new Map(statuses.map((s) => [key(s.childId, s.appId), s.status]));
+
+  const matches = children.map((child) => ({
+    child,
+    apps: apps.filter((app) => appMatchesChild(app, child)),
+  }));
+
+  const missing = matches.flatMap(({ child, apps }) =>
+    apps
+      .filter((app) => !statusIndex.has(key(child.id, app.id)))
+      .map((app) => ({ childId: child.id, appId: app.id, status: "Not Installed" as const })),
   );
 
-  const matchedPairs: { childId: number; appId: number }[] = [];
-
-  for (const child of children) {
-    for (const app of apps) {
-      if (app.ageMin > child.age || app.ageMax < child.age) continue;
-      const hasSharedTag = app.interestTags.some((tag) =>
-        (child.interests as string[]).includes(tag)
-      );
-      if (!hasSharedTag) continue;
-      matchedPairs.push({ childId: child.id, appId: app.id });
-    }
-  }
-
-  const missingPairs = matchedPairs.filter(
-    ({ childId, appId }) => !statusIndex.has(`${childId}-${appId}`)
-  );
-
-  if (missingPairs.length > 0) {
+  if (missing.length > 0) {
     const inserted = await db
       .insert(childAppStatusTable)
-      .values(
-        missingPairs.map(({ childId, appId }) => ({
-          childId,
-          appId,
-          status: "Not Installed" as const,
-        }))
-      )
+      .values(missing)
       .onConflictDoNothing()
       .returning();
-
-    for (const row of inserted) {
-      statusIndex.set(`${row.childId}-${row.appId}`, row.status);
-    }
+    for (const row of inserted) statusIndex.set(key(row.childId, row.appId), row.status);
   }
 
-  const result = children.map((child) => {
-    const matchedApps = apps
-      .filter((app) => {
-        if (app.ageMin > child.age || app.ageMax < child.age) return false;
-        return app.interestTags.some((tag) =>
-          (child.interests as string[]).includes(tag)
-        );
-      })
-      .map((app) => ({
-        app: {
-          id: app.id,
-          name: app.name,
-          appStoreUrl: app.appStoreUrl,
-          category: app.category,
-          ageMin: app.ageMin,
-          ageMax: app.ageMax,
-          interestTags: app.interestTags,
-          costModel: app.costModel,
-          adStatus: app.adStatus,
-          notes: app.notes,
-          lastVerified: String(app.lastVerified),
-          status: app.status,
-          createdAt: app.createdAt.toISOString(),
-          updatedAt: app.updatedAt.toISOString(),
-        },
-        childStatus: statusIndex.get(`${child.id}-${app.id}`) ?? "Not Installed",
-      }));
-
-    return {
-      child: {
-        id: child.id,
-        name: child.name,
-        age: child.age,
-        interests: child.interests,
-        deviceName: child.deviceName,
-        screenTimeWeekday: child.screenTimeWeekday,
-        screenTimeWeekend: child.screenTimeWeekend,
-        appleArcade: child.appleArcade,
-        createdAt: child.createdAt.toISOString(),
-        updatedAt: child.updatedAt.toISOString(),
-      },
-      matchedApps,
-    };
-  });
-
-  res.json(result);
+  res.json(
+    matches.map(({ child, apps }) => ({
+      child,
+      matchedApps: apps.map((app) => ({
+        app,
+        childStatus: statusIndex.get(key(child.id, app.id)) ?? "Not Installed",
+      })),
+    })),
+  );
 });
 
 export default router;

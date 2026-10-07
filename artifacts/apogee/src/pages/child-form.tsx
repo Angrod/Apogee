@@ -15,26 +15,14 @@ import {
 import type { Child } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeftIcon, CheckIcon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { minutesToHours, hoursToMinutes } from "@/lib/screen-time";
-
-const INTEREST_TAGS = [
-  "Engineering",
-  "Baking/Food",
-  "Music",
-  "Drawing",
-  "Reading",
-  "Math",
-  "Science",
-  "Gaming",
-  "Language Learning",
-] as const;
+import { INTEREST_TAGS } from "@/lib/catalog";
+import { FormField, ToggleChip, toggled } from "@/components/form-field";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -57,53 +45,6 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
-type InterestTag = (typeof INTEREST_TAGS)[number];
-
-function InterestToggle({
-  tag,
-  selected,
-  onToggle,
-}: {
-  tag: InterestTag;
-  selected: boolean;
-  onToggle: (tag: InterestTag) => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onToggle(tag)}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-        selected
-          ? "bg-amber-100 border-amber-400 text-amber-900"
-          : "bg-white border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50"
-      }`}
-    >
-      {selected && <CheckIcon className="h-3 w-3" />}
-      {tag}
-    </button>
-  );
-}
-
-function FormField({
-  label,
-  error,
-  children,
-  hint,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-  hint?: string;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-sm font-medium text-stone-700">{label}</Label>
-      {children}
-      {hint && <p className="text-xs text-stone-400">{hint}</p>}
-      {error && <p className="text-xs text-red-600">{error}</p>}
-    </div>
-  );
-}
 
 function ChildFormContent({ childId }: { childId?: number }) {
   const [, navigate] = useLocation();
@@ -157,6 +98,7 @@ function ChildFormContent({ childId }: { childId?: number }) {
     register,
     handleSubmit,
     setValue,
+    getValues,
     watch,
     reset,
     formState: { errors, isSubmitting },
@@ -189,15 +131,6 @@ function ChildFormContent({ childId }: { childId?: number }) {
 
   const interests = watch("interests") ?? [];
   const appleArcade = watch("appleArcade");
-
-  function toggleInterest(tag: InterestTag) {
-    const current = interests;
-    if (current.includes(tag)) {
-      setValue("interests", current.filter((t) => t !== tag));
-    } else {
-      setValue("interests", [...current, tag]);
-    }
-  }
 
   function onSubmit(values: FormValues) {
     const payload = {
@@ -305,11 +238,11 @@ function ChildFormContent({ childId }: { childId?: number }) {
       <FormField label="Interests">
         <div className="flex flex-wrap gap-2 pt-1">
           {INTEREST_TAGS.map((tag) => (
-            <InterestToggle
+            <ToggleChip
               key={tag}
-              tag={tag}
+              value={tag}
               selected={interests.includes(tag)}
-              onToggle={toggleInterest}
+              onToggle={(t) => setValue("interests", toggled(getValues("interests") ?? [], t))}
             />
           ))}
         </div>
@@ -338,11 +271,9 @@ function ChildFormContent({ childId }: { childId?: number }) {
         >
           {isBusy ? "Saving…" : isEditing ? "Save Changes" : "Create Profile"}
         </Button>
-        <Link href="/children">
-          <Button type="button" variant="ghost" className="text-stone-500">
-            Cancel
-          </Button>
-        </Link>
+        <Button asChild variant="ghost" className="text-stone-500">
+          <Link href="/children">Cancel</Link>
+        </Button>
       </div>
     </form>
   );

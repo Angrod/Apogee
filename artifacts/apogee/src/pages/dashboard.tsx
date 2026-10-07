@@ -5,15 +5,17 @@ import {
   useUpdateChildAppStatus,
   getGetDashboardQueryKey,
 } from "@workspace/api-client-react";
-import type { DashboardAppEntry, DashboardEntry } from "@workspace/api-client-react";
+import type { DashboardAppEntry, DashboardEntry, InstallStatus } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLinkIcon, RocketIcon, GamepadIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { INSTALL_STATUSES, costColor } from "@/lib/catalog";
 
-const STATUS_ORDER = ["Pushed", "Installed", "Not Installed", "Removed"] as const;
-type AppStatus = (typeof STATUS_ORDER)[number];
+// Dropdown order: what the parent is working on first.
+const STATUS_ORDER: InstallStatus[] = ["Pushed", "Installed", "Not Installed", "Removed"];
+type AppStatus = InstallStatus;
 
 const STATUS_COLORS: Record<AppStatus, string> = {
   Pushed: "text-blue-700 bg-blue-50 border-blue-200",
@@ -28,15 +30,9 @@ const GROUP_HEADER_COLORS: Record<string, string> = {
   "Not Installed": "text-stone-500",
 };
 
-function costColor(cost: string) {
-  if (cost === "Free") return "bg-green-100 text-green-800 border-green-200";
-  if (cost === "Subscription") return "bg-orange-100 text-orange-800 border-orange-200";
-  return "bg-sky-100 text-sky-800 border-sky-200";
-}
-
+// The DB enum still has legacy values (Blocked, Limited) the UI doesn't offer.
 function toAppStatus(s: string): AppStatus {
-  if (STATUS_ORDER.includes(s as AppStatus)) return s as AppStatus;
-  return "Not Installed";
+  return (INSTALL_STATUSES as string[]).includes(s) ? (s as AppStatus) : "Not Installed";
 }
 
 type StatusKey = string;

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "wouter";
-import { useListApps, getListAppsQueryKey } from "@workspace/api-client-react";
-import type { CatalogApp, InterestTag } from "@workspace/api-client-react";
+import { useListApps } from "@workspace/api-client-react";
+import type { CatalogApp, Category, InterestTag } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,43 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { PlusIcon, ExternalLinkIcon, CalendarIcon } from "lucide-react";
-
-const CATEGORIES = ["All", "Games", "Education", "Creative", "Music", "Reading"] as const;
-const INTEREST_TAGS = [
-  "All",
-  "Engineering",
-  "Baking/Food",
-  "Music",
-  "Drawing",
-  "Reading",
-  "Math",
-  "Science",
-  "Gaming",
-  "Language Learning",
-] as const;
-
-function categoryColor(cat: string) {
-  switch (cat) {
-    case "Games": return "bg-purple-100 text-purple-800 border-purple-200";
-    case "Education": return "bg-blue-100 text-blue-800 border-blue-200";
-    case "Creative": return "bg-pink-100 text-pink-800 border-pink-200";
-    case "Music": return "bg-indigo-100 text-indigo-800 border-indigo-200";
-    case "Reading": return "bg-emerald-100 text-emerald-800 border-emerald-200";
-    default: return "bg-stone-100 text-stone-700 border-stone-200";
-  }
-}
-
-function costColor(cost: string) {
-  if (cost === "Free") return "bg-green-100 text-green-800 border-green-200";
-  if (cost === "Subscription") return "bg-orange-100 text-orange-800 border-orange-200";
-  return "bg-sky-100 text-sky-800 border-sky-200";
-}
-
-function adColor(ad: string) {
-  if (ad === "No Ads") return "bg-green-100 text-green-800 border-green-200";
-  if (ad === "Has Ads") return "bg-red-100 text-red-800 border-red-200";
-  return "bg-yellow-100 text-yellow-800 border-yellow-200";
-}
+import { CATEGORIES, INTEREST_TAGS, adColor, categoryColor, costColor } from "@/lib/catalog";
 
 function AppCard({ app }: { app: CatalogApp }) {
   const isRemoved = app.status === "Removed";
@@ -66,11 +30,9 @@ function AppCard({ app }: { app: CatalogApp }) {
               )}
             </div>
           </div>
-          <Link href={`/catalog/${app.id}`}>
-            <Button variant="outline" size="sm" className="shrink-0 text-stone-600 hover:text-amber-800 hover:border-amber-300">
-              Edit
-            </Button>
-          </Link>
+          <Button asChild variant="outline" size="sm" className="shrink-0 text-stone-600 hover:text-amber-800 hover:border-amber-300">
+            <Link href={`/catalog/${app.id}`}>Edit</Link>
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -135,8 +97,8 @@ function AppCardSkeleton() {
 
 export default function Catalog() {
   const [showRemoved, setShowRemoved] = useState(false);
-  const [categoryFilter, setCategoryFilter] = useState<string>("All");
-  const [tagFilter, setTagFilter] = useState<string>("All");
+  const [categoryFilter, setCategoryFilter] = useState<Category | "All">("All");
+  const [tagFilter, setTagFilter] = useState<InterestTag | "All">("All");
 
   const { data: allApps, isLoading, isError } = useListApps({ includeRemoved: true });
 
@@ -145,7 +107,7 @@ export default function Catalog() {
     return allApps.filter((app) => {
       if (!showRemoved && app.status === "Removed") return false;
       if (categoryFilter !== "All" && app.category !== categoryFilter) return false;
-      if (tagFilter !== "All" && !app.interestTags.includes(tagFilter as InterestTag)) return false;
+      if (tagFilter !== "All" && !app.interestTags.includes(tagFilter)) return false;
       return true;
     });
   }, [allApps, showRemoved, categoryFilter, tagFilter]);
@@ -157,12 +119,12 @@ export default function Catalog() {
           <h1 className="text-2xl font-bold text-stone-900">App Catalog</h1>
           <p className="text-sm text-stone-500 mt-1">Your vetted collection of iPad apps.</p>
         </div>
-        <Link href="/catalog/new">
-          <Button className="bg-amber-600 hover:bg-amber-700 text-white gap-1.5">
+        <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white gap-1.5">
+          <Link href="/catalog/new">
             <PlusIcon className="h-4 w-4" />
             Add App
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <div className="bg-white border border-stone-200 rounded-xl p-4 mb-6 space-y-4">
@@ -170,7 +132,7 @@ export default function Catalog() {
           <div>
             <p className="text-xs font-medium text-stone-500 mb-2">Category</p>
             <div className="flex flex-wrap gap-1.5">
-              {CATEGORIES.map((cat) => (
+              {(["All", ...CATEGORIES] as const).map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setCategoryFilter(cat)}
@@ -190,7 +152,7 @@ export default function Catalog() {
         <div>
           <p className="text-xs font-medium text-stone-500 mb-2">Interest Tag</p>
           <div className="flex flex-wrap gap-1.5">
-            {INTEREST_TAGS.map((tag) => (
+            {(["All", ...INTEREST_TAGS] as const).map((tag) => (
               <button
                 key={tag}
                 onClick={() => setTagFilter(tag)}
@@ -236,7 +198,7 @@ export default function Catalog() {
         </div>
       )}
 
-      {!isLoading && filtered.length === 0 && (
+      {!isLoading && !isError && filtered.length === 0 && (
         <div className="text-center py-16 text-stone-500">
           <p className="text-lg font-medium mb-1">No apps match your filters</p>
           <p className="text-sm mb-4">Try adjusting the category or interest tag filter.</p>

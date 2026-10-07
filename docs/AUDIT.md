@@ -166,6 +166,18 @@ Found during this step:
 - ✅ Removed a Next.js `"use client"` directive from `label.tsx` that caused a build warning.
 - Still open (step 6): the DB columns for category, cost, ads, and status are free text, so only the API enforces the enums. Moving them into DB enums or check constraints needs a reviewed migration.
 
+## Step 5 notes (done)
+- **One source for option lists.** `src/lib/catalog.ts` builds the interest, category, cost, ad, and status lists from the enums generated from `openapi.yaml`, and holds the shared badge colors. The page-local copies are gone.
+- **Shared form pieces** in `src/components/form-field.tsx` (`FormField`, `ToggleChip` with `aria-pressed`, `toggled`).
+- **One matching rule.** `api-server/src/lib/matching.ts` (`appMatchesChild`). The dashboard no longer rebuilds responses field by field, and it sorts children by ID like the Children page.
+- **No more `<button>` inside `<a>`.** Six places now use `Button asChild`.
+- **One Zod version.** The unused `drizzle-zod`/`zod/v4` insert schemas were removed from `lib/db`, along with the risky `push-force` script.
+- **Stricter TypeScript.** `tsconfig.base.json` has `strict`, `noUnusedLocals`, and `noUnusedParameters`. This caught one unused import.
+- **Catalog page** no longer shows "No apps match" next to the error banner.
+- **API `dev`** now uses `tsx watch` (reloads on save) instead of build-then-start.
+
+Found during browser testing: tag toggles read the tag list captured at render time, so two clicks before a re-render lost the first one. They now read the live value with `getValues`. Verified in a browser: rapid double clicks save both tags, filters, and links. The API checks still pass 30/30.
+
 ## Proposed cleanup order
 
 Each step is a separate, reviewable change.
@@ -174,6 +186,6 @@ Each step is a separate, reviewable change.
 2. ✅ **Remove Replit leftovers and bloat** (§4, §5): mockup sandbox, unused UI and packages, Replit config and plugins, `index.html` placeholders, `noindex`. Pure deletion; verified by typecheck, build, and clicking through.
 3. ✅ **Fix the data-loss and drift bugs** (2.1, 2.2, 2.6, 2.7, 2.8): frontend only.
 4. ✅ **Harden the API** (2.3, 2.4, 2.5): enums in the spec, validation with the generated schemas, a JSON error handler, an atomic upsert, removed or replaced DELETEs.
-5. **Consolidate** (§6): shared constants from the spec, one matching function, the `<Link>`/`<Button>` fix, one Zod version.
+5. ✅ **Consolidate** (§6): shared constants from the spec, one matching function, the `<Link>`/`<Button>` fix, one Zod version.
 6. **Data:** correct the seed entries (§3), and plan the DB fixes (interests type, legacy enum values, constraint vs. index) as a reviewed migration against a backup.
 7. **Tests:** turn HANDOFF §17 into automated checks.

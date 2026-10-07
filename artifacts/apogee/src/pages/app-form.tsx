@@ -15,28 +15,13 @@ import {
 import type { CatalogApp } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeftIcon, CheckIcon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-
-const INTEREST_TAGS = [
-  "Engineering",
-  "Baking/Food",
-  "Music",
-  "Drawing",
-  "Reading",
-  "Math",
-  "Science",
-  "Gaming",
-  "Language Learning",
-] as const;
-
-const CATEGORIES = ["Games", "Education", "Creative", "Music", "Reading"] as const;
-const COST_MODELS = ["Free", "One-time purchase", "Subscription"] as const;
-const AD_STATUSES = ["No Ads", "Minimal", "Has Ads"] as const;
+import { INTEREST_TAGS, CATEGORIES, COST_MODELS, AD_STATUSES, CATALOG_STATUSES } from "@/lib/catalog";
+import { FormField, ToggleChip, toggled } from "@/components/form-field";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -56,60 +41,13 @@ const schema = z.object({
   costModel: z.enum(COST_MODELS, { required_error: "Cost model is required" }),
   adStatus: z.enum(AD_STATUSES, { required_error: "Ad status is required" }),
   notes: z.string().default(""),
-  status: z.enum(["Active", "Removed"]).default("Active"),
+  status: z.enum(CATALOG_STATUSES).default("Active"),
 }).refine((d) => d.ageMax >= d.ageMin, {
   message: "Max age must be ≥ min age",
   path: ["ageMax"],
 });
 
 type FormValues = z.infer<typeof schema>;
-type InterestTag = (typeof INTEREST_TAGS)[number];
-
-function InterestToggle({
-  tag,
-  selected,
-  onToggle,
-}: {
-  tag: InterestTag;
-  selected: boolean;
-  onToggle: (tag: InterestTag) => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onToggle(tag)}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-        selected
-          ? "bg-amber-100 border-amber-400 text-amber-900"
-          : "bg-white border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50"
-      }`}
-    >
-      {selected && <CheckIcon className="h-3 w-3" />}
-      {tag}
-    </button>
-  );
-}
-
-function FormField({
-  label,
-  error,
-  children,
-  hint,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-  hint?: string;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-sm font-medium text-stone-700">{label}</Label>
-      {children}
-      {hint && <p className="text-xs text-stone-400">{hint}</p>}
-      {error && <p className="text-xs text-red-600">{error}</p>}
-    </div>
-  );
-}
 
 function SelectField({
   label,
@@ -193,6 +131,7 @@ function AppFormContent({ appId }: { appId?: number }) {
     register,
     handleSubmit,
     setValue,
+    getValues,
     watch,
     reset,
     formState: { errors, isSubmitting },
@@ -217,14 +156,14 @@ function AppFormContent({ appId }: { appId?: number }) {
       reset({
         name: existingApp.name,
         appStoreUrl: existingApp.appStoreUrl,
-        category: existingApp.category as (typeof CATEGORIES)[number],
+        category: existingApp.category,
         ageMin: existingApp.ageMin,
         ageMax: existingApp.ageMax,
         interestTags: existingApp.interestTags,
-        costModel: existingApp.costModel as (typeof COST_MODELS)[number],
-        adStatus: existingApp.adStatus as (typeof AD_STATUSES)[number],
+        costModel: existingApp.costModel,
+        adStatus: existingApp.adStatus,
         notes: existingApp.notes,
-        status: existingApp.status as "Active" | "Removed",
+        status: existingApp.status,
       });
     }
   }, [existingApp, reset]);
@@ -234,15 +173,6 @@ function AppFormContent({ appId }: { appId?: number }) {
   const costModel = watch("costModel");
   const adStatus = watch("adStatus");
   const status = watch("status");
-
-  function toggleTag(tag: InterestTag) {
-    const current = interestTags;
-    if (current.includes(tag)) {
-      setValue("interestTags", current.filter((t) => t !== tag));
-    } else {
-      setValue("interestTags", [...current, tag]);
-    }
-  }
 
   function onSubmit(values: FormValues) {
     const payload = {
@@ -352,11 +282,11 @@ function AppFormContent({ appId }: { appId?: number }) {
       <FormField label="Interest Tags">
         <div className="flex flex-wrap gap-2 pt-1">
           {INTEREST_TAGS.map((tag) => (
-            <InterestToggle
+            <ToggleChip
               key={tag}
-              tag={tag}
+              value={tag}
               selected={interestTags.includes(tag)}
-              onToggle={toggleTag}
+              onToggle={(t) => setValue("interestTags", toggled(getValues("interestTags") ?? [], t))}
             />
           ))}
         </div>
@@ -374,7 +304,7 @@ function AppFormContent({ appId }: { appId?: number }) {
       <div className="rounded-lg border border-stone-200 p-4">
         <p className="text-sm font-medium text-stone-700 mb-2">Status</p>
         <div className="flex gap-2">
-          {(["Active", "Removed"] as const).map((s) => (
+          {CATALOG_STATUSES.map((s) => (
             <button
               key={s}
               type="button"
@@ -404,11 +334,9 @@ function AppFormContent({ appId }: { appId?: number }) {
         >
           {isBusy ? "Saving…" : isEditing ? "Save Changes" : "Add to Catalog"}
         </Button>
-        <Link href="/catalog">
-          <Button type="button" variant="ghost" className="text-stone-500">
-            Cancel
-          </Button>
-        </Link>
+        <Button asChild variant="ghost" className="text-stone-500">
+          <Link href="/catalog">Cancel</Link>
+        </Button>
       </div>
     </form>
   );
