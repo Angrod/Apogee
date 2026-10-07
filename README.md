@@ -1,10 +1,12 @@
 # Apogee
 
-A family app-management tool: think Jamf Pro-style app curation, but for a parent managing their kids' iPads.
+An MDM for parents: Jamf Pro-style app and device management, scaled down for a family managing kids' iPads.
 
 Parents keep child profiles (age, interests, device, screen-time goals) and a shared catalog of vetted apps. Apogee matches apps to each child by age and interests, and tracks per-child install status (Not Installed → Pushed → Installed / Removed).
 
-> **Stage 1 scope:** Apogee records the parent's decisions. It is **not** an MDM yet. "Push" is a status marker, so it sends nothing to Apple or the device. Installation and Screen Time enforcement still happen manually on the iPad.
+Apogee is meant to both record the parent's decisions and act on the devices: getting apps from the shared catalog onto each child's iPad, either pushed by the parent or installed by the kids through a self-service catalog. How apps will be delivered is still being worked out.
+
+> **Current state (Stage 1):** only the recording side exists. "Push" is a status marker for now, so it sends nothing to Apple or the device. Installation and Screen Time enforcement still happen manually on the iPad.
 
 ## Stack
 

@@ -1,14 +1,14 @@
 # Apogee
 
-Family app-management tool (parent-facing, MDM-inspired) for curating and tracking apps on kids' iPads. Read `docs/HANDOFF.md` for the full product and architecture guide. The original brief is `docs/original-brief.md`.
+An MDM for parents: Jamf Pro-style device and app management, scaled down for a family managing kids' iPads. Read `docs/HANDOFF.md` for the current implementation and architecture. The original brief is `docs/original-brief.md`.
 
-## Working agreement
+## Product direction
 
-- Work on **one explicitly approved task at a time**. Finish it, report actual results and limits, then stop and wait for approval before starting the next task. Do not run through a roadmap unprompted.
+Apogee has two jobs: recording the parent's decisions (catalog, per-child status, notes) and acting on the devices. The goal is for apps to reach a child's iPad from the shared catalog, either pushed by the parent or installed by the kids themselves as long as the app is in the catalog. How that delivery will work is still open (MDM install commands, a self-service model like Jamf Self Service, or something else).
+
+The current Stage 1 code only does the recording half. "Pushed" is still just a status marker. Until real delivery exists, the UI and docs should not imply that an install happened.
 
 ## Product invariants
-
-- Apogee records decisions; it does not control devices. Never present "Pushed" status, screen-time goals, or the Arcade flag as real installation, measurement, or enforcement.
 - Keep the shared catalog (`apps`) separate from per-child state (`child_app_status`).
 - Catalog removal is a soft delete (`status = Removed`). Keep records and notes.
 - The DB is authoritative. No hardcoded demo data.
