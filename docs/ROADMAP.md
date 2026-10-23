@@ -4,6 +4,16 @@
 
 Decisions and their reasoning are in [DECISIONS.md](DECISIONS.md); the cleanup findings are in [AUDIT.md](AUDIT.md).
 
+## Where we left off (paused 2026-10-23)
+Last work: code cleanup finished, local dev set up, undo/removal shipped, this roadmap restructured. Nothing is in progress or uncommitted.
+
+**To pick back up:**
+1. Start Postgres if it isn't running: `brew services start postgresql@18`
+2. `pnpm install` then `pnpm dev`, and open http://localhost:3000
+3. Do **To do §1**: enter the boys' real profiles and use it for a few days
+4. Meanwhile, start **§2** (Apple account, the family-MDM question, bundle ID naming)
+5. When ready to build, answer the three questions in **§3 Authentication**. That's the next coding task.
+
 ## To do
 
 ### 1. Use it with real data
